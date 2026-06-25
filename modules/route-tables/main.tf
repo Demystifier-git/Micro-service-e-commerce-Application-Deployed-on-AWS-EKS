@@ -1,9 +1,7 @@
-
-
-# Public route table
+# PUBLIC
 resource "aws_route_table" "public" {
   vpc_id = var.vpc_id
-  tags = { Name = "public-rt" }
+  tags   = { Name = "public-rt" }
 }
 
 resource "aws_route" "public_route" {
@@ -13,14 +11,18 @@ resource "aws_route" "public_route" {
 }
 
 resource "aws_route_table_association" "public_assoc" {
-  subnet_id      = var.public_subnet_id
+  for_each = {
+    for idx, subnet in var.public_subnet_ids : idx => subnet
+  }
+
+  subnet_id      = each.value
   route_table_id = aws_route_table.public.id
 }
 
-# Private route table
+# PRIVATE
 resource "aws_route_table" "private" {
   vpc_id = var.vpc_id
-  tags = { Name = "private-rt" }
+  tags   = { Name = "private-rt" }
 }
 
 resource "aws_route" "private_route" {
@@ -30,6 +32,10 @@ resource "aws_route" "private_route" {
 }
 
 resource "aws_route_table_association" "private_assoc" {
-  subnet_id      = var.private_subnet_id
+  for_each = {
+    for idx, subnet in var.private_subnet_ids : idx => subnet
+  }
+
+  subnet_id      = each.value
   route_table_id = aws_route_table.private.id
 }

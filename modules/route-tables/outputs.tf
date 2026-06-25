@@ -10,17 +10,7 @@ output "private_route_table_id" {
   value       = aws_route_table.private.id
 }
 
-# Output for Public Route Table Association
-output "public_route_table_association_id" {
-  description = "ID of the public route table association"
-  value       = aws_route_table_association.public_assoc.id
-}
 
-# Output for Private Route Table Association
-output "private_route_table_association_id" {
-  description = "ID of the private route table association"
-  value       = aws_route_table_association.private_assoc.id
-}
 
 # Optional: Output the created routes
 output "public_route_id" {
@@ -31,4 +21,12 @@ output "public_route_id" {
 output "private_route_id" {
   description = "ID of the private route"
   value       = aws_route.private_route.id
+}
+
+output "public_route_table_association_ids" {
+  value = [for a in aws_route_table_association.public_assoc : a.id]
+}
+
+output "private_route_table_association_ids" {
+  value = [for a in aws_route_table_association.private_assoc : a.id]
 }

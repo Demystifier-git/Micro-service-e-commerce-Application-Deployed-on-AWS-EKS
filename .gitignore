@@ -1,18 +1,21 @@
-.*.swp
-.DS_Store
-*-private.*
-vendor/
-Gopkg.lock
-.env
 
+terraform.tfvars
+.terraform
+terraform/.terraform.lock.hcl
+terraform.state
 .terraform/
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
+terraform.tfvars
 .terraform.lock.hcl
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform/.terraform.lock.hcl
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+debug.log
 
-# SSH Keys
-*.pem
-
-# OS files
-.DS_Store
-*.swp

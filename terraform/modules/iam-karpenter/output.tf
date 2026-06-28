@@ -1,0 +1,7 @@
+output "karpenter_role_arn" {
+  value = aws_iam_role.karpenter.arn
+}
+
+output "karpenter_instance_profile" {
+  value = aws_iam_instance_profile.karpenter.name
+}

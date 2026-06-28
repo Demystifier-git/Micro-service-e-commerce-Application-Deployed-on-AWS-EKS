@@ -1,0 +1,39 @@
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    externalUrl: https://prometheus.yourdomain.com
+
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/certificate-arn: <YOUR_ACM_ARN>
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+    hosts:
+      - prometheus.yourdomain.com
+    paths:
+      - /
+    pathType: Prefix
+
+
+grafana:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/certificate-arn: <YOUR_ACM_ARN>
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+    hosts:
+      - grafana.yourdomain.com
+    paths:
+      - /
+    pathType: Prefix
+
+
+alertmanager:
+  enabled: true

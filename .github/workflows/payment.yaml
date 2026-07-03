@@ -1,42 +1,105 @@
-name: Payment
+name: Payment Service
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - '**.py'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/payment.yaml'  # Include workflow file changes
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Git branch to deploy"
+        required: true
+        default: "main"
+        type: string
 
-  pull_request:
-    branches:
-      - master
-    paths:
-      - '**.py'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/payment.yaml'  # Include workflow file changes
+      version:
+        description: "Semantic version tag (example: v1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: payment
 
 jobs:
-  payment:
-    name: Build and deploy payment microservice
-    runs-on: [self-hosted]  # Use a standard runner instead of self-hosted
+  build:
+    name: Build and Push Payment Service
+    runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - name: Checkout code 
-        uses: actions/checkout@v2
+      
+      # Checkout Code
+     
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
-      - name:  Python install
-        run: sudo apt-get install python3 
+      
+      # Validate SemVer
+     
+      - name: Validate version format
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
 
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: Version must follow v1.2.3 format"
+            exit 1
+          fi
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      
+      # Configure AWS Credentials
+     
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      
+      # Login to Amazon ECR
+     
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set ECR Registry
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+
+      
+      # Install Python (if needed for build/tests)
+     
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      
+      # Build Docker Image
+      
       - name: Build Docker image
         run: |
-          docker build -t payment .  # Build image tagged as 'payment' from current directory
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION \
+            .
 
-      - name: Docker Login (use secrets)
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Docker Push
+     
+      # Push Image to ECR
+      
+      - name: Push Docker image
         run: |
-          docker tag payment ${name}/payment:latest
-          docker push ${name}/payment:latest
+          docker push \
+            $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
+
+      # Summary
+      
+      - name: Deployment Summary
+        run: |
+          echo "Service: payment"
+          echo "Version: $VERSION"
+          echo "Image: $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"

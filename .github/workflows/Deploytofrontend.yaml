@@ -1,0 +1,101 @@
+name: Production Frontend Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Git branch or tag to deploy"
+        required: true
+        default: "main"
+        type: string
+
+      version:
+        description: "Semantic version tag (example: v1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: robotshop-frontend-prod
+  CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+
+jobs:
+  deploy:
+    name: Deploy Frontend to S3
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      # ------------------------
+      # Checkout Source
+      # ------------------------
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      # ------------------------
+      # Validate SemVer
+      # ------------------------
+      - name: Validate version format
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: Version must follow v1.2.3 format"
+            exit 1
+          fi
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      # ------------------------
+      # AWS Authentication
+      # ------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ------------------------
+      # Verify Frontend Directory
+      # ------------------------
+      - name: Verify web directory exists
+        run: |
+          if [ ! -d "web" ]; then
+            echo "ERROR: web directory not found"
+            exit 1
+          fi
+
+      # ------------------------
+      # Deploy Static Files
+      # ------------------------
+      - name: Upload frontend to S3
+        run: |
+          aws s3 sync \
+            web/ \
+            s3://${S3_BUCKET}/ \
+            --delete
+
+      # ------------------------
+      # Invalidate CloudFront Cache
+      # ------------------------
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} \
+            --paths "/index.html"
+
+      # ------------------------
+      # Deployment Summary
+      # ------------------------
+      - name: Deployment Summary
+        run: |
+          echo "Frontend Version: ${VERSION}"
+          echo "Branch/Tag: ${{ github.event.inputs.branch }}"
+          echo "Deployment completed successfully"
+

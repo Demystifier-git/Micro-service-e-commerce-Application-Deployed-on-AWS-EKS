@@ -1,42 +1,103 @@
-name: User
+name: User Service Production Deploy
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - '**.js'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/user.yaml'  # Include workflow file changes
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Git branch to deploy"
+        required: true
+        default: "main"
+        type: string
 
-  pull_request:
-    branches:
-      - master
-    paths:
-      - '**.js'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/user.yaml'  # Include workflow file changes
+      version:
+        description: "Semantic version tag (example: v1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: user
 
 jobs:
-  payment:
-    name: Build and deploy user microservice
-    runs-on: [self-hosted]  # Use a standard runner instead of self-hosted
+  deploy:
+    name: Build and Push User Service
+    runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - name: Checkout code 
-        uses: actions/checkout@v2
+      
+      # Checkout Source
+    
+      - name: Checkout source code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
-      - name: NPM install
-        run: npm install 
+    
+      # Validate SemVer
+      
+      - name: Validate version format
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
 
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: Version must follow v1.2.3 format"
+            exit 1
+          fi
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    
+      # Configure AWS Credentials
+     
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+     
+      # Login to Amazon ECR
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set ECR Registry
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+
+     
+      # Install Dependencies
+     
+      - name: Install Dependencies
+        run: npm install
+
+      # Build Docker Image
+      
       - name: Build Docker image
         run: |
-          docker build -t user .  # Build image tagged as 'payment' from current directory
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION \
+            .
 
-      - name: Docker Login (use secrets)
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Docker Push
+      # Push Version Tag
+     
+      - name: Push Version Image
         run: |
-          docker tag user ${name}/user:latest
-          docker user ${name}/user:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
+
+     
+      # Deployment Summary
+ 
+      - name: Deployment Summary
+        run: |
+          echo "Service: user"
+          echo "Version: ${VERSION}"
+          echo "Repository: $ECR_REGISTRY/$ECR_REPOSITORY"
+          echo "Deployment completed successfully"
+

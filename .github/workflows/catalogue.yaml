@@ -1,42 +1,67 @@
-name: Catalogue
+name: Catalogue Service
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - '**.js'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/catalogue.yaml'  # Include workflow file changes
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Git branch to deploy"
+        required: true
+        default: "main"
+        type: string
 
-  pull_request:
-    branches:
-      - master
-    paths:
-      - '**.js'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/catalogue.yaml'  # Include workflow file changes
+      version:
+        description: "Semantic version tag (example: v1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: catalogue
 
 jobs:
-  payment:
-    name: Build and deploy catalogue microservice
-    runs-on: [self-hosted]  # Use a standard runner instead of self-hosted
+  build:
+    name: Build and Push Catalogue Service
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code 
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
-      - name: NPM install
-        run: npm install 
+      - name: Validate version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set registry
+        run: echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Build Docker image
         run: |
-          docker build -t catalogue .  # Build image tagged as 'payment' from current directory
+          docker build \
+            -t $ECR_REGISTRY/catalogue:$VERSION \
+            .
 
-      - name: Docker Login (use secrets)
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Docker Push
-        run: |
-          docker tag catalogue ${name}/catalogue:latest
-          docker catalogue ${name}/catalogue:latest
+      - name: Push image
+        run: docker push $ECR_REGISTRY/catalogue:$VERSION

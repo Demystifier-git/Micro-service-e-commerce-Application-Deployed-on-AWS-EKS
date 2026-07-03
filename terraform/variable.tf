@@ -35,6 +35,12 @@ variable "db_username" {
   type        = string
 }
 
+
+variable "db_name" {
+  description = "Username for RDS database"
+  type        = string
+}
+
 variable "db_password" {
   description = "Password for RDS database"
   type        = string

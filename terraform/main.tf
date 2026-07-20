@@ -134,15 +134,14 @@ module "node_group" {
 module "irsa" {
   source = "../modules/irsa"
 
-  env             = var.environment
-  role_name       = var.irsa_role_name
-  namespace       = var.eks_namespace
-  service_account = var.irsa_service_account
+  cluster_name         = module.eks.cluster_name
+  oidc_provider_arn    = module.eks.oidc_provider_arn
+  oidc_provider_url    = module.eks.oidc_provider_url
+  hosted_zone_id       = var.hosted_zone_id
+  region               = var.region
+  karpenter_node_role_arn = module.iam.karpenter_node_role_arn
 
-  oidc_provider_arn = module.eks.oidc_provider_arn
-  oidc_provider_url = module.eks.oidc_issuer
-  cluster_name      = module.eks.cluster_name
-  oidc_issuer       = module.eks.oidc_issuer
+  tags = var.tags
 }
 
 module "alb" {
@@ -154,28 +153,27 @@ module "alb" {
 }
 
 module "monitoring" {
-  source    = "../modules/monitoring"
+  source = "../modules/monitoring"
+
   namespace = var.namespace
+
+  grafana_hostname    = var.grafana_hostname
+  prometheus_hostname = var.prometheus_hostname
+  certificate_arn     = var.certificate_arn
 }
 
 module "karpenter" {
-  source = "../modules/karpenter"
+  source = "./modules/karpenter"
 
   cluster_name     = module.eks.cluster_name
-  iam_role_arn     = module.iam_karpenter.karpenter_role_arn
-  instance_profile = module.iam_karpenter.karpenter_instance_profile
   cluster_endpoint = module.eks.cluster_endpoint
+  namespace        = "karpenter"
 
+  iam_role_arn    = module.irsa.karpenter_role_arn
+  instance_profile = module.iam.karpenter_instance_profile_name
 }
 
-module "iam_karpenter" {
-  source = "../modules/iam-karpenter"
 
-  cluster_name      = module.eks.cluster_name
-  oidc_provider_arn = module.irsa.oidc_provider_arn
-  oidc_host         = module.irsa.oidc_host
-  eks_dependency    = module.eks
-}
 
 module "argocd" {
   source = "../modules/argocd"
@@ -186,9 +184,7 @@ module "argocd" {
   ecr_url        = module.ecr_web_app.repository_url
 
 
-  depends_on = [
-    module.image_updater
-  ]
+ 
 }
 
 locals {
@@ -203,6 +199,10 @@ locals {
     ratings    = ["mysql",]
     redis    = ["db",]
     shipping   = ["mysqldb",]
+    grafana = [
+      "admin",
+      "smtp"
+    ]
   }
 }
 
@@ -220,9 +220,10 @@ module "secrets" {
     }
   ]...)
 
-  name = "${var.environment}/${each.value.service}/${each.value.purpose}"
-
+  name        = "${var.environment}/${each.value.service}/${each.value.purpose}"
   environment = var.environment
+
+  secret_value = var.secret_values[each.key]
 }
 
 module "external_secrets" {
@@ -267,4 +268,46 @@ module "tempo" {
   source = "../modules/tempo"
 
   namespace = var.namespace
+}
+
+module "cloudfront" {
+
+  source = "./modules/cloudfront"
+
+  project_name = var.project_name
+
+  environment = var.environment
+
+  bucket_id = module.frontend_bucket.bucket_id
+
+  bucket_arn = module.frontend_bucket.bucket_arn
+
+  bucket_regional_domain_name = module.frontend_bucket.bucket_regional_domain_name
+
+  acm_certificate_arn = module.acm.certificate_arn
+
+  aliases = [
+
+    "app.delightdavid.online"
+
+  ]
+
+  cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+
+  
+}
+
+# Route53
+module "route53" {
+  source = "./modules/route53"
+
+  domain_name = var.domain_name
+
+  tags = var.tags
+}
+
+module "iam" {
+  source = "./modules/iam"
+
+  tags = var.tags
 }

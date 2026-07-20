@@ -9,3 +9,8 @@ variable "environment" {
   description = "denvironment for secrets"
   type        = string
 }
+
+variable "secret_value" {
+  type      = any
+  sensitive = true
+}

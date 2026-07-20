@@ -163,6 +163,24 @@ variable "namespace" {
   type = string
 }
 
+variable "secret_values" {
+  description = "Map of secret values to populate AWS Secrets Manager"
+  type        = map(any)
+  sensitive   = true
+}
+
+variable "project_name" {
+  type = string
+}
+
+variable "domain_name" {
+  type = string
+}
+
+
+
+
+
 
 
 

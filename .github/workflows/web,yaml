@@ -29,17 +29,17 @@ jobs:
     environment: production
 
     steps:
-      # ------------------------
+     
       # Checkout Code
-      # ------------------------
+      
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      # ------------------------
+      
       # Validate SemVer
-      # ------------------------
+      
       - name: Validate version format
         run: |
           VERSION="${{ github.event.inputs.version }}"
@@ -51,18 +51,18 @@ jobs:
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # ------------------------
+     
       # Configure AWS
-      # ------------------------
+    
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ------------------------
+     
       # Login to ECR
-      # ------------------------
+      
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -71,25 +71,25 @@ jobs:
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
 
-      # ------------------------
+     
       # Build Docker Image
-      # ------------------------
+     
       - name: Build image
         run: |
           docker build \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION \
             .
 
-      # ------------------------
+     
       # Push Image
-      # ------------------------
+     
       - name: Push image to ECR
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
 
-      # ------------------------
+    
       # Summary
-      # ------------------------
+      
       - name: Deployment Summary
         run: |
           echo "Service: web"

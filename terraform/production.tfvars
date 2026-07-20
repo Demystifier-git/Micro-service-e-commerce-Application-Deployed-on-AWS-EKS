@@ -56,3 +56,5 @@ account_id    = "387041334219"
 repo_url      = "https://github.com/Demystifier-git/Micro-service-E_commerce-Application-Deployed-on-AWS-EKS.git"
 namespace     = "monitoring"
 
+domain_name = "delightdavid.online"
+

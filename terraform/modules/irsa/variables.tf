@@ -1,36 +1,41 @@
-variable "oidc_issuer" {
-  description = "EKS OIDC issuer URL"
-}
-
 variable "cluster_name" {
-  description = "EKS cluster name"
+  description = "EKS cluster name."
+  type        = string
 }
 
 variable "env" {
-  type = string
-}
-
-variable "role_name" {
+  description = "Environment name."
   type        = string
-  description = "Name of the IAM role for IRSA"
 }
 
 variable "oidc_provider_arn" {
+  description = "OIDC Provider ARN."
   type        = string
-  description = "OIDC provider ARN from EKS cluster"
 }
 
 variable "oidc_provider_url" {
+  description = "OIDC Provider URL."
   type        = string
-  description = "OIDC issuer URL from EKS cluster"
 }
 
-variable "namespace" {
+variable "region" {
+  description = "AWS Region."
   type        = string
-  description = "Kubernetes namespace for service account"
 }
 
-variable "service_account" {
+variable "hosted_zone_id" {
+  description = "Route53 Hosted Zone ID."
   type        = string
-  description = "Kubernetes service account name"
+}
+
+variable "tags" {
+  description = "Common resource tags."
+  type        = map(string)
+
+  default = {}
+}
+
+variable "karpenter_node_role_arn" {
+  description = "IAM role ARN used by Karpenter launched nodes"
+  type        = string
 }

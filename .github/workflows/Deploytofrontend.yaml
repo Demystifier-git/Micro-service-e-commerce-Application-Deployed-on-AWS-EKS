@@ -30,17 +30,17 @@ jobs:
     environment: production
 
     steps:
-      # ------------------------
+      
       # Checkout Source
-      # ------------------------
+      
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      # ------------------------
+    
       # Validate SemVer
-      # ------------------------
+      
       - name: Validate version format
         run: |
           VERSION="${{ github.event.inputs.version }}"
@@ -52,18 +52,18 @@ jobs:
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # ------------------------
+     
       # AWS Authentication
-      # ------------------------
+    
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ------------------------
+     
       # Verify Frontend Directory
-      # ------------------------
+      
       - name: Verify web directory exists
         run: |
           if [ ! -d "web" ]; then
@@ -71,9 +71,9 @@ jobs:
             exit 1
           fi
 
-      # ------------------------
+      
       # Deploy Static Files
-      # ------------------------
+     
       - name: Upload frontend to S3
         run: |
           aws s3 sync \
@@ -81,18 +81,18 @@ jobs:
             s3://${S3_BUCKET}/ \
             --delete
 
-      # ------------------------
+     
       # Invalidate CloudFront Cache
-      # ------------------------
+      
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} \
             --paths "/index.html"
 
-      # ------------------------
+     
       # Deployment Summary
-      # ------------------------
+      
       - name: Deployment Summary
         run: |
           echo "Frontend Version: ${VERSION}"

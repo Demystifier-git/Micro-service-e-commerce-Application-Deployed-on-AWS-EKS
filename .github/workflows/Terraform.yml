@@ -15,7 +15,7 @@ env:
 jobs:
 
 
-# TERRAFORM PLAN
+# TERRAFORM PLANN
 
 
   plan:

@@ -303,7 +303,7 @@ module "route53" {
 
   domain_name = var.domain_name
 
-  
+
 }
 
 module "iam" {

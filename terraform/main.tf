@@ -163,7 +163,7 @@ module "monitoring" {
 }
 
 module "karpenter" {
-  source = "./modules/karpenter"
+  source = "../modules/karpenter"
 
   cluster_name     = module.eks.cluster_name
   cluster_endpoint = module.eks.cluster_endpoint
@@ -272,7 +272,7 @@ module "tempo" {
 
 module "cloudfront" {
 
-  source = "./modules/cloudfront"
+  source = "../modules/cloudfront"
 
   project_name = var.project_name
 
@@ -299,7 +299,7 @@ module "cloudfront" {
 
 # Route53
 module "route53" {
-  source = "./modules/route53"
+  source = "../modules/route53"
 
   domain_name = var.domain_name
 
@@ -307,7 +307,7 @@ module "route53" {
 }
 
 module "iam" {
-  source = "./modules/iam"
+  source = "../modules/IAM"
 
   tags = var.tags
 }

@@ -253,7 +253,7 @@ locals {
 module "ecr" {
   for_each = toset(local.services)
 
-  source = "./modules/ecr"
+  source = "./modules/ECR"
 
   name = each.value
 

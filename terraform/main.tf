@@ -4,13 +4,13 @@ provider "aws" {
 
 # VPC
 module "vpc" {
-  source     = "../modules/vpc"
+  source     = "./modules/vpc"
   cidr_block = var.vpc_cidr
 }
 
 # Subnets
 module "subnets" {
-  source             = "../modules/subnets"
+  source             = "./modules/subnets"
   vpc_id             = module.vpc.vpc_id
   availability_zones = var.availability_zones
 }
@@ -18,19 +18,19 @@ module "subnets" {
 
 # Internet Gateway
 module "igw" {
-  source = "../modules/internet-gateway"
+  source = "./modules/internet-gateway"
   vpc_id = module.vpc.vpc_id
 }
 
 # NAT Gateway
 module "nat" {
-  source           = "../modules/nat-gateway"
+  source           = "./modules/nat-gateway"
   public_subnet_id = module.subnets.public_subnet_ids[0]
   depends_on       = [module.igw]
 }
 
 module "routes" {
-  source = "../modules/route-tables"
+  source = "./modules/route-tables"
 
   vpc_id = module.vpc.vpc_id
   igw_id = module.igw.igw_id
@@ -42,20 +42,20 @@ module "routes" {
 
 # Security Groups
 module "web_sg" {
-  source  = "../modules/security-group-web"
+  source  = "./modules/security-group-web"
   vpc_id  = module.vpc.vpc_id
   sg_name = "web-sg"
 }
 
 module "db_sg" {
-  source         = "../modules/security-group-db"
+  source         = "./modules/security-group-db"
   vpc_id         = module.vpc.vpc_id
   sg_name        = "db-new"
   allowed_sg_ids = [module.web_sg.sg_id]
 }
 
 module "vpc_sg" {
-  source  = "../modules/security-group-VPC"
+  source  = "./modules/security-group-VPC"
   vpc_id  = module.vpc.vpc_id
   sg_name = "vpc-sg"
 }
@@ -64,7 +64,7 @@ module "vpc_sg" {
 
 # RDS
 module "rds" {
-  source = "../modules/rds"
+  source = "./modules/rds"
 
   name               = "mysql-db"
   db_name            = var.db_name
@@ -79,7 +79,7 @@ module "rds" {
 }
 
 module "s3" {
-  source      = "../modules/S3"
+  source      = "./modules/S3"
   bucket_name = var.bucket_name
   environment = var.environment
 
@@ -90,7 +90,7 @@ module "s3" {
 }
 
 module "dynamodb" {
-  source = "../modules/dynamodb"
+  source = "./modules/dynamodb"
 
   table_name   = var.dynamodb_table_name
   hash_key     = var.dynamodb_hash_key
@@ -98,7 +98,7 @@ module "dynamodb" {
   environment  = var.environment
 
   tags = {
-    Project = "development"
+    Project = "stan-robot-shop"
     Env     = var.environment
   }
 }
@@ -108,7 +108,7 @@ module "dynamodb" {
 
 
 module "eks" {
-  source = "../modules/eks"
+  source = "./modules/eks"
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
@@ -118,7 +118,7 @@ module "eks" {
 }
 
 module "node_group" {
-  source = "../modules/node_group"
+  source = "./modules/node_group"
 
   cluster_name = module.eks.cluster_name
   subnet_ids   = module.subnets.private_subnet_ids
@@ -132,7 +132,7 @@ module "node_group" {
 }
 
 module "irsa" {
-  source = "../modules/irsa"
+  source = "./modules/irsa"
 
   cluster_name            = module.eks.cluster_name
   oidc_provider_arn       = module.eks.oidc_provider_arn
@@ -145,7 +145,7 @@ module "irsa" {
 }
 
 module "alb" {
-  source       = "../modules/alb"
+  source       = "./modules/alb"
   cluster_name = module.eks.cluster_name
   region       = var.region
   alb_role_arn = module.irsa.alb_role_arn
@@ -153,7 +153,7 @@ module "alb" {
 }
 
 module "monitoring" {
-  source = "../modules/monitoring"
+  source = "./modules/monitoring"
 
   namespace = var.namespace
 
@@ -163,7 +163,7 @@ module "monitoring" {
 }
 
 module "karpenter" {
-  source = "../modules/karpenter"
+  source = "./modules/karpenter"
 
   cluster_name     = module.eks.cluster_name
   cluster_endpoint = module.eks.cluster_endpoint
@@ -176,7 +176,7 @@ module "karpenter" {
 
 
 module "argocd" {
-  source = "../modules/argocd"
+  source = "./modules/argocd"
 
   repo_url       = var.repo_url
   region         = var.region
@@ -208,7 +208,7 @@ locals {
 
 
 module "secrets" {
-  source = "../modules/secrets-manager"
+  source = "./modules/secrets-manager"
 
   for_each = merge([
     for service, purposes in local.secrets : {
@@ -227,7 +227,7 @@ module "secrets" {
 }
 
 module "external_secrets" {
-  source = "../modules/external-secrets"
+  source = "./modules/external-secrets"
 
   env           = var.environment
   region        = var.region
@@ -265,14 +265,14 @@ module "ecr" {
 
 
 module "tempo" {
-  source = "../modules/tempo"
+  source = "./modules/tempo"
 
   namespace = var.namespace
 }
 
 module "cloudfront" {
 
-  source = "../modules/cloudfront"
+  source = "./modules/cloudfront"
 
   project_name = var.project_name
 
@@ -299,7 +299,7 @@ module "cloudfront" {
 
 # Route53
 module "route53" {
-  source = "../modules/route53"
+  source = "./modules/route53"
 
   domain_name = var.domain_name
 
@@ -307,7 +307,7 @@ module "route53" {
 }
 
 module "iam" {
-  source = "../modules/IAM"
+  source = "./modules/IAM"
 
   tags = var.tags
 }

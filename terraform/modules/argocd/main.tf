@@ -5,13 +5,13 @@
 terraform {
   required_providers {
     kubernetes = {
-      source  = "hashicorp/kubernetes"
+      source = "hashicorp/kubernetes"
     }
     helm = {
-      source  = "hashicorp/helm"
+      source = "hashicorp/helm"
     }
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
     }
   }
 }
@@ -77,7 +77,7 @@ resource "helm_release" "argocd" {
             "alb.ingress.kubernetes.io/listen-ports" = "[{\"HTTP\":80}]"
           }
 
-          
+
         }
       }
 

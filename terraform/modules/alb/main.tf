@@ -38,7 +38,7 @@ resource "helm_release" "alb" {
   }
 
   set {
-  name  = "vpcId"
-  value = var.vpc_id
-}
+    name  = "vpcId"
+    value = var.vpc_id
+  }
 }

@@ -134,11 +134,11 @@ module "node_group" {
 module "irsa" {
   source = "../modules/irsa"
 
-  cluster_name         = module.eks.cluster_name
-  oidc_provider_arn    = module.eks.oidc_provider_arn
-  oidc_provider_url    = module.eks.oidc_provider_url
-  hosted_zone_id       = var.hosted_zone_id
-  region               = var.region
+  cluster_name            = module.eks.cluster_name
+  oidc_provider_arn       = module.eks.oidc_provider_arn
+  oidc_provider_url       = module.eks.oidc_provider_url
+  hosted_zone_id          = var.hosted_zone_id
+  region                  = var.region
   karpenter_node_role_arn = module.iam.karpenter_node_role_arn
 
   tags = var.tags
@@ -169,7 +169,7 @@ module "karpenter" {
   cluster_endpoint = module.eks.cluster_endpoint
   namespace        = "karpenter"
 
-  iam_role_arn    = module.irsa.karpenter_role_arn
+  iam_role_arn     = module.irsa.karpenter_role_arn
   instance_profile = module.iam.karpenter_instance_profile_name
 }
 
@@ -184,21 +184,21 @@ module "argocd" {
   ecr_url        = module.ecr_web_app.repository_url
 
 
- 
+
 }
 
 locals {
   secrets = {
-    payment = ["mongodb","redis"]
-    cart    = ["redis"]
-    user    = ["mongodb", "redis"]
-    catalogue    = ["mongodb",]
-    dispatch    = ["rabbitmq",]
-    mongodb    = ["mongodb",]
-    rabbitmq    = ["db",]
-    ratings    = ["mysql",]
-    redis    = ["db",]
-    shipping   = ["mysqldb",]
+    payment   = ["mongodb", "redis"]
+    cart      = ["redis"]
+    user      = ["mongodb", "redis"]
+    catalogue = ["mongodb", ]
+    dispatch  = ["rabbitmq", ]
+    mongodb   = ["mongodb", ]
+    rabbitmq  = ["db", ]
+    ratings   = ["mysql", ]
+    redis     = ["db", ]
+    shipping  = ["mysqldb", ]
     grafana = [
       "admin",
       "smtp"
@@ -294,7 +294,7 @@ module "cloudfront" {
 
   cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
 
-  
+
 }
 
 # Route53

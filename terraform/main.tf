@@ -142,6 +142,7 @@ module "irsa" {
   karpenter_node_role_arn = module.iam.karpenter_node_role_arn
 
   tags = var.tags
+  env = var.environment
 }
 
 module "alb" {

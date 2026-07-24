@@ -126,7 +126,7 @@ module "node_group" {
 
 
   node_groups   = var.node_groups
-  node_role_arn = aws_iam_role.node.arn
+  node_role_arn = module.iam.node_role_arn
 
   node_security_group_id = aws_security_group.node_sg.id
 }
@@ -135,9 +135,8 @@ module "irsa" {
   source = "./modules/irsa"
 
   cluster_name            = module.eks.cluster_name
-  oidc_provider_arn       = module.eks.oidc_provider_arn
-  oidc_provider_url       = module.eks.oidc_provider_url
-  hosted_zone_id          = var.hosted_zone_id
+  oidc_provider_arn = module.eks.oidc_provider_arn
+  oidc_provider_url = module.eks.oidc_issuer
   region                  = var.region
   karpenter_node_role_arn = module.iam.karpenter_node_role_arn
 

@@ -135,8 +135,8 @@ module "irsa" {
   source = "./modules/irsa"
 
   cluster_name            = module.eks.cluster_name
-  oidc_provider_arn = module.eks.oidc_provider_arn
-  oidc_provider_url = module.eks.oidc_issuer
+  oidc_provider_arn       = module.eks.oidc_provider_arn
+  oidc_provider_url       = module.eks.oidc_issuer
   region                  = var.region
   karpenter_node_role_arn = module.iam.karpenter_node_role_arn
 

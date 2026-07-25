@@ -177,6 +177,20 @@ variable "domain_name" {
   type = string
 }
 
+variable "grafana_hostname" {
+  description = "Hostname for Grafana"
+  type        = string
+}
+
+variable "prometheus_hostname" {
+  description = "Hostname for Prometheus"
+  type        = string
+}
+
+variable "certificate_arn" {
+  description = "ACM certificate ARN used by monitoring ingress"
+  type        = string
+}
 
 
 

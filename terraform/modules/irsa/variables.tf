@@ -23,10 +23,7 @@ variable "region" {
   type        = string
 }
 
-variable "hosted_zone_id" {
-  description = "Route53 Hosted Zone ID."
-  type        = string
-}
+
 
 variable "tags" {
   description = "Common resource tags."

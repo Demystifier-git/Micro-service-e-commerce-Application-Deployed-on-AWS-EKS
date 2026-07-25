@@ -7,29 +7,25 @@ output "alb_role_arn" {
 
 
 output "role_arn" {
-  value       = aws_iam_role.eso_role.arn
-  description = "IAM Role ARN created for IRSA"
+  description = "External Secrets Operator IAM Role ARN"
+  value       = aws_iam_role.eso.arn
 }
 
 output "role_name" {
-  value       = aws_iam_role.eso_role.name
-  description = "IAM Role name created for IRSA"
+  description = "External Secrets Operator IAM Role Name"
+  value       = aws_iam_role.eso.name
 }
 
 output "oidc_provider_arn" {
-  value = data.aws_iam_openid_connect_provider.this.arn
+  value = var.oidc_provider_arn
 }
 
 output "oidc_provider_url" {
-  value = data.aws_iam_openid_connect_provider.this.url
+  value = var.oidc_provider_url
 }
 
 output "oidc_host" {
-  value = replace(
-    data.aws_iam_openid_connect_provider.this.url,
-    "https://",
-    ""
-  )
+  value = replace(var.oidc_provider_url, "https://", "")
 }
 
 output "karpenter_role_arn" {

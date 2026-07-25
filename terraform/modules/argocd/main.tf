@@ -158,9 +158,5 @@ resource "helm_release" "argocd" {
   ]
 }
 
-# ---------------------------------------------------------
-# OUTPUT: ALB URL (manual lookup friendly)
-# ---------------------------------------------------------
-output "argocd_note" {
-  value = "Run: kubectl get ingress -n argocd to get ALB URL"
-}
+
+

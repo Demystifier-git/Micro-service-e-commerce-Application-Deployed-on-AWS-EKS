@@ -177,14 +177,6 @@ module "karpenter" {
 
 module "argocd" {
   source = "./modules/argocd"
-
-  repo_url       = var.repo_url
-  region         = var.region
-  ecr_account_id = var.account_id
-  ecr_url        = module.ecr_web_app.repository_url
-
-
-
 }
 
 locals {
@@ -278,13 +270,13 @@ module "cloudfront" {
 
   environment = var.environment
 
-  bucket_id = module.frontend_bucket.bucket_id
+  bucket_id = module.s3.bucket_id
 
-  bucket_arn = module.frontend_bucket.bucket_arn
+  bucket_arn = module.s3.bucket_arn
 
-  bucket_regional_domain_name = module.frontend_bucket.bucket_regional_domain_name
+  bucket_regional_domain_name = module.s3.bucket_regional_domain_name
 
-  acm_certificate_arn = module.acm.certificate_arn
+  acm_certificate_arn = var.certificate_arn
 
   aliases = [
 

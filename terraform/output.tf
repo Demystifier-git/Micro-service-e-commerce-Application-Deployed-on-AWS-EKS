@@ -32,16 +32,6 @@ output "dynamodb_table_arn" {
   value       = module.dynamodb.table_arn
 }
 
-# EC2 outputs
-output "ec2_instance_id" {
-  description = "The ID of the EC2 instance"
-  value       = module.ec2.instance_id
-}
-
-output "ec2_public_ip" {
-  description = "The public IP of the EC2 instance"
-  value       = module.ec2.public_ip
-}
 
 output "rds_endpoint" {
   description = "The endpoint of the RDS instance"
@@ -91,13 +81,7 @@ output "external_secrets_namespace" {
   value = module.external_secrets.namespace
 }
 
-output "ecr_repository_url" {
-  value = module.ecr_web_app.repository_url
-}
 
-output "ecr_repository_name" {
-  value = module.ecr_web_app.repository_name
-}
 
 
 

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment
+
+  template:
+    metadata:
+      labels:
+        app: payment
+
+    spec:
+      containers:
+        - name: payment
+          image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/payment:latest
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: AMQP_HOST
+              value: rabbitmq
+
+            - name: AMQP_PORT
+              value: "5672"
+
+            - name: AMQP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-db
+                  key: username
+
+            - name: AMQP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-db
+                  key: password
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20

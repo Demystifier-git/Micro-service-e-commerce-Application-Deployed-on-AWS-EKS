@@ -5,11 +5,15 @@ from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
 class Publisher:
-    HOST = os.getenv('AMQP_HOST', 'rabbitmq')
-    VIRTUAL_HOST = '/'
-    EXCHANGE='robot-shop'
-    TYPE='direct'
-    ROUTING_KEY = 'orders'
+    HOST = os.getenv("AMQP_HOST", "rabbitmq")
+    PORT = int(os.getenv("AMQP_PORT", "5672"))
+    USERNAME = os.getenv("AMQP_USERNAME")
+    PASSWORD = os.getenv("AMQP_PASSWORD")
+    VIRTUAL_HOST = os.getenv("AMQP_VHOST", "/")
+
+    EXCHANGE = "robot-shop"
+    TYPE = "direct"
+    ROUTING_KEY = "orders"
 
     def __init__(self, logger):
         self._logger = logger

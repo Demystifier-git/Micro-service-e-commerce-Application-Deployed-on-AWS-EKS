@@ -32,15 +32,21 @@ class Database implements LoggerAwareInterface
 
     private $tracer;
 
-    public function __construct(string $dsn, string $user, string $password)
-    {
-        $this->dsn = $dsn;
-        $this->user = $user;
-        $this->password = $password;
+   public function __construct()
+{
+    $this->dsn = sprintf(
+        "mysql:host=%s;port=%s;dbname=%s",
+        getenv("MYSQL_HOST"),
+        getenv("MYSQL_PORT"),
+        getenv("MYSQL_DATABASE")
+    );
 
-        // OpenTelemetry tracer
-        $this->tracer = TracerProvider::getDefaultTracer();
-    }
+    $this->user = getenv("MYSQL_USERNAME");
+    $this->password = getenv("MYSQL_PASSWORD");
+
+    // OpenTelemetry tracer
+    $this->tracer = TracerProvider::getDefaultTracer();
+}
 
     public function getConnection(): PDO
     {

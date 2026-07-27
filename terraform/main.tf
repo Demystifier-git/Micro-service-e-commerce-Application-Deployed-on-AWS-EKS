@@ -181,20 +181,11 @@ module "argocd" {
 
 locals {
   secrets = {
-    payment   = ["mongodb", "redis"]
-    cart      = ["redis"]
-    user      = ["mongodb", "redis"]
-    catalogue = ["mongodb", ]
-    dispatch  = ["rabbitmq", ]
-    mongodb   = ["mongodb", ]
+    mongodb   = ["db", ]
     rabbitmq  = ["db", ]
-    ratings   = ["mysql", ]
     redis     = ["db", ]
-    shipping  = ["mysqldb", ]
-    grafana = [
-      "admin",
-      "smtp"
-    ]
+    mysql  =    ["db", ]
+   
   }
 }
 

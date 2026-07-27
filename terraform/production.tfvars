@@ -13,7 +13,7 @@ availability_zones = [
 
 
 # Tags (optional but common)
-environment = "dev"
+environment = "production"
 
 db_engine_version    = "8.0"
 db_instance_class    = "db.t3.micro"
@@ -52,7 +52,6 @@ node_groups = {
 }
 
 eks_namespace = "external-secrets"
-account_id    = "387041334219"
 repo_url      = "https://github.com/Demystifier-git/Micro-service-E_commerce-Application-Deployed-on-AWS-EKS.git"
 namespace     = "monitoring"
 

@@ -60,10 +60,7 @@ variable "bucket_name" {
   type        = string
 }
 
-variable "bucket_region" {
-  description = "Region where the S3 bucket will be created"
-  type        = string
-}
+
 
 
 variable "environment" {
@@ -123,11 +120,6 @@ variable "eks_namespace" {
 }
 
 
-
-variable "account_id" {
-  description = "AWS Account ID"
-  type        = string
-}
 
 
 

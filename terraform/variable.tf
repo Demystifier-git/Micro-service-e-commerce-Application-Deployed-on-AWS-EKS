@@ -98,15 +98,6 @@ variable "cluster_version" {
 }
 
 
-variable "endpoint_private_access" {
-  description = "Enable private access to the Kubernetes API server"
-  type        = bool
-}
-
-variable "endpoint_public_access" {
-  description = "Enable public access to the Kubernetes API server"
-  type        = bool
-}
 
 
 
@@ -131,25 +122,14 @@ variable "eks_namespace" {
   default = "external-secrets"
 }
 
-variable "irsa_role_name" {
-  type    = string
-  default = "external-secrets-irsa-role"
-}
 
-variable "irsa_service_account" {
-  type    = string
-  default = "external-secrets-sa"
-}
 
 variable "account_id" {
   description = "AWS Account ID"
   type        = string
 }
 
-variable "repo_url" {
-  description = "GitOps repository URL"
-  type        = string
-}
+
 
 variable "namespace" {
   type = string
@@ -165,9 +145,7 @@ variable "project_name" {
   type = string
 }
 
-variable "domain_name" {
-  type = string
-}
+
 
 variable "grafana_hostname" {
   description = "Hostname for Grafana"

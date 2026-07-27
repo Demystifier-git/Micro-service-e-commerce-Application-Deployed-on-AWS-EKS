@@ -19,15 +19,7 @@ variable "availability_zones" {
 }
 
 
-variable "key_name" {
-  description = "The name of the SSH key pair for EC2 instances"
-  type        = string
-}
 
-variable "ec2_ami" {
-  description = "The AMI ID to use for EC2 instances"
-  type        = string
-}
 
 
 variable "db_username" {

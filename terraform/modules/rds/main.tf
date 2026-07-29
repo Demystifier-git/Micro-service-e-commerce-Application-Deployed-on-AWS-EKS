@@ -21,6 +21,9 @@ resource "aws_db_instance" "this" {
 
   vpc_security_group_ids = var.security_group_ids
   db_subnet_group_name   = aws_db_subnet_group.this.name
+  performance_insights_enabled          = true
+  performance_insights_kms_key_id       = var.kms_key_arn
+  performance_insights_retention_period = 7
 
   skip_final_snapshot = true
   publicly_accessible = false

@@ -15,95 +15,164 @@ if not API_KEY:
     print("ERROR: GEMINI_API_KEY not found.")
     sys.exit(1)
 
-LOG_FILE = pathlib.Path("terraform/terraform.log")
-REPORT_FILE = pathlib.Path("terraform/ai_report.md")
+REPORT_FILE = pathlib.Path("ai_report.md")
 
-if not LOG_FILE.exists():
+LOG_FILES = {
+    "Terraform Format": pathlib.Path("fmt.log"),
+    "Terraform Validate": pathlib.Path("validate.log"),
+    "TFLint": pathlib.Path("tflint.log"),
+    "tfsec": pathlib.Path("tfsec.log"),
+    "Checkov": pathlib.Path("checkov.log"),
+    "Trivy": pathlib.Path("trivy.log"),
+    "Terraform Plan": pathlib.Path("terraform.log"),
+}
+
+###############################################################################
+# Read Logs
+###############################################################################
+
+logs = []
+
+MAX_CHARS_PER_LOG = 20000
+
+for tool, path in LOG_FILES.items():
+
+    if path.exists():
+
+        content = path.read_text(
+            encoding="utf-8",
+            errors="ignore"
+        )
+
+        if len(content) > MAX_CHARS_PER_LOG:
+            content = content[-MAX_CHARS_PER_LOG:]
+
+        logs.append(
+            f"""
+==============================
+{tool}
+==============================
+
+{content}
+"""
+        )
+
+if not logs:
     REPORT_FILE.write_text(
-        "# AI Analysis\n\n"
-        "Terraform log file was not found.\n"
+        "# AI DevOps Report\n\n"
+        "No log files were found."
     )
     sys.exit(0)
 
-###############################################################################
-# Read Terraform Log
-###############################################################################
-
-terraform_log = LOG_FILE.read_text(encoding="utf-8", errors="ignore")
-
-###############################################################################
-# Trim Very Large Logs
-###############################################################################
-
-MAX_CHARS = 40000
-
-if len(terraform_log) > MAX_CHARS:
-    terraform_log = terraform_log[-MAX_CHARS:]
+combined_logs = "\n".join(logs)
 
 ###############################################################################
 # Prompt
 ###############################################################################
 
 PROMPT = f"""
-You are a Principal AWS DevOps Engineer.
+You are a Principal AWS DevOps Engineer,
+Principal Cloud Security Engineer,
+and Principal Platform Engineer.
 
-Analyze the Terraform deployment log below.
+You are reviewing a failed Terraform CI/CD pipeline.
 
-Return your answer in Markdown.
+The pipeline contains outputs from:
 
-Use this exact format.
+- terraform fmt
+- terraform validate
+- TFLint
+- tfsec
+- Checkov
+- Trivy
+- Terraform Plan
+
+Your job is NOT merely to summarize.
+
+You must act like a senior engineer reviewing a pull request.
+
+Return Markdown.
 
 # 🤖 AI DevOps Engineer Report
 
 ## Executive Summary
 
-One paragraph.
+Summarize the pipeline health.
 
 ---
 
-## Root Cause
+## Pipeline Status
 
-Explain the actual root cause.
-
----
-
-## AWS Services Involved
-
-List every AWS service involved.
+State which stages passed and which failed.
 
 ---
 
-## Terraform Files Likely Responsible
+## Findings
 
-List probable files.
+Group findings into:
 
-Example
+### Critical
 
-modules/eks/main.tf
+### High
 
-modules/irsa/alb.tf
+### Medium
 
-terraform/main.tf
+### Low
+
+For every finding explain:
+
+- Why it happened
+- Why it matters
+- Which Terraform file is responsible
 
 ---
 
-## Suggested Fix
+## Root Cause Analysis
 
-Explain exactly what should change.
+Explain the underlying causes.
+
+---
+
+## Exact Terraform Fixes
+
+For every issue provide:
+
+- Terraform file
+- Resource
+- Exact property to change
+- Recommended value
 
 ---
 
 ## Example Terraform Code
 
-Provide example Terraform code if appropriate.
+Provide production-ready Terraform snippets.
 
 ---
 
-## Safe To Retry?
+## AWS Best Practices
 
-Yes or No.
+Explain what AWS recommends.
+
+---
+
+## Safe To Deploy?
+
+Answer:
+
+YES
+
+or
+
+NO
 
 Explain why.
+
+---
+
+## Priority Order
+
+List the fixes in the order they should be completed.
 
 ---
 
@@ -111,9 +180,9 @@ Explain why.
 
 Provide a confidence percentage.
 
-Terraform Log
+Pipeline Logs
 
-{terraform_log}
+{combined_logs}
 """
 
 ###############################################################################
@@ -123,14 +192,15 @@ Terraform Log
 client = genai.Client(api_key=API_KEY)
 
 ###############################################################################
-# Ask Gemini
+# Generate Report
 ###############################################################################
 
 response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents=PROMPT,
     config=types.GenerateContentConfig(
-        temperature=0.2,
+        temperature=0.1,
+        top_p=0.9,
     ),
 )
 
@@ -138,6 +208,9 @@ response = client.models.generate_content(
 # Save Report
 ###############################################################################
 
-REPORT_FILE.write_text(response.text, encoding="utf-8")
+REPORT_FILE.write_text(
+    response.text,
+    encoding="utf-8",
+)
 
 print("AI report generated successfully.")

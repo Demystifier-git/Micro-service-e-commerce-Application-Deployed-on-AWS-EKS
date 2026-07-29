@@ -20,7 +20,7 @@ db_instance_class    = "db.t3.micro"
 db_allocated_storage = 20
 
 bucket_name   = "demystifier-bucket-387041334219"
-bucket_region = "us-east-1"
+
 
 dynamodb_table_name   = "terraform-demo-table"
 dynamodb_hash_key     = "id"
@@ -30,8 +30,7 @@ cluster_version       = "1.33"
 
 
 
-endpoint_private_access = true
-endpoint_public_access  = true
+
 
 tags = {
   Environment = "production"

@@ -7,9 +7,9 @@ resource "aws_ecr_repository" "this" {
   }
 
   encryption_configuration {
-  encryption_type = "KMS"
-  kms_key         = var.kms_key_arn
-}
+    encryption_type = "KMS"
+    kms_key         = var.kms_key_arn
+  }
 
   tags = var.tags
 }

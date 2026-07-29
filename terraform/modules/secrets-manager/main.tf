@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "this" {
-  name = "${var.environment}/${var.name}-${terraform.workspace}"
+  name       = "${var.environment}/${var.name}-${terraform.workspace}"
   kms_key_id = var.kms_key_arn
 
 

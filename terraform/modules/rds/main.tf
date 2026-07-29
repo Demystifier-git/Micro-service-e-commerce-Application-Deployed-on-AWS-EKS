@@ -14,8 +14,8 @@ resource "aws_db_instance" "this" {
   username = var.username
   password = var.password
 
-  storage_encrypted = true
-  kms_key_id        = var.kms_key_arn
+  storage_encrypted       = true
+  kms_key_id              = var.kms_key_arn
   backup_retention_period = 7
   deletion_protection     = true
 

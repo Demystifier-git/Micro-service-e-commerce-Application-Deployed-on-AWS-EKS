@@ -13,7 +13,7 @@ resource "aws_security_group" "db-new" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-  cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   tags = {

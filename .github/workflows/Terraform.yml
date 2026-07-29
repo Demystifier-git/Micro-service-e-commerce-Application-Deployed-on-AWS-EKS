@@ -61,7 +61,7 @@ jobs:
           pip install checkov
 
       - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.2
+        uses: aquasecurity/trivy-action@0.33.1
 
       - name: Terraform Format
         continue-on-error: true

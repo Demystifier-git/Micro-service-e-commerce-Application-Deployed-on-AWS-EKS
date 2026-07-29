@@ -14,45 +14,62 @@ env:
 
 jobs:
 
-################################################################################
-# STATIC ANALYSIS
-################################################################################
-
+  ################################################################################
+  # STATIC ANALYSIS
+  ################################################################################
   static-analysis:
-
+    name: Static Analysis
     runs-on: ubuntu-latest
-
-    environment: production
-
+    environment:
+      name: production
     defaults:
       run:
         working-directory: terraform
-
     env:
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_db_name: ${{ secrets.DB_NAME }}
       TF_VAR_secret_values: ${{ secrets.SECRET_VALUES }}
-
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
-
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.TERRAFORM_AWS_ROLE_ARN }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - uses: terraform-linters/setup-tflint@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: Terraform fmt
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Install tfsec
+        run: |
+          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+
+      - name: Install Checkov
+        run: |
+          python -m pip install --upgrade pip
+          pip install checkov
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.2
+
+      - name: Terraform Format
         continue-on-error: true
         run: terraform fmt -check -recursive > fmt.log 2>&1
 
       - name: Terraform Init
-        run: terraform init -reconfigure
+        continue-on-error: true
+        run: terraform init -reconfigure > init.log 2>&1
 
       - name: Terraform Validate
         continue-on-error: true
@@ -76,10 +93,13 @@ jobs:
         continue-on-error: true
         run: trivy config . > trivy.log 2>&1
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Scan Logs
+        uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: security-logs
           path: |
+            terraform/init.log
             terraform/fmt.log
             terraform/validate.log
             terraform/tflint.log
@@ -87,114 +107,182 @@ jobs:
             terraform/checkov.log
             terraform/trivy.log
 
-################################################################################
-# AI REVIEW
-################################################################################
+      - name: Fail if any scan failed
+        run: |
+          failed=0
+          grep -qi "error" fmt.log && failed=1 || true
+          grep -qi "error" validate.log && failed=1 || true
+          grep -qi "failed" tflint.log && failed=1 || true
+          grep -qi "CRITICAL" tfsec.log && failed=1 || true
+          grep -qi "FAILED" checkov.log && failed=1 || true
+          grep -qi "CRITICAL" trivy.log && failed=1 || true
+          exit $failed
 
+  ################################################################################
+  # AI REVIEW
+  ################################################################################
   ai-review:
-
+    name: Gemini AI Review
     needs: static-analysis
-
-    if: always()
-
+    if: failure()
     runs-on: ubuntu-latest
-
     steps:
-
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
+      - name: Download Logs
+        uses: actions/download-artifact@v4
         with:
           name: security-logs
+          path: terraform
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - run: |
-          pip install -r requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r .github/requirements.txt
 
-      - name: Gemini Review
+      - name: Run Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          python .github/scripts/ai_devops_engineer.py
+        run: python .github/scripts/ai_devops_engineer.py
 
-      - name: Publish AI Report
-        if: always()
-        run: |
-          cat ai_report.md >> $GITHUB_STEP_SUMMARY
+      - name: Upload AI Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-report
+          path: ai_report.md
 
-################################################################################
-# PLAN
-################################################################################
+      - name: Publish Report
+        run: cat ai_report.md >> $GITHUB_STEP_SUMMARY
 
+  ################################################################################
+  # PLAN
+  ################################################################################
   plan:
-
+    name: Terraform Plan
     needs: static-analysis
-
-    if: needs.static-analysis.result == 'success'
-
     runs-on: ubuntu-latest
-
+    environment: production
     defaults:
       run:
         working-directory: terraform
-
+    env:
+      TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
+      TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_db_name: ${{ secrets.DB_NAME }}
+      TF_VAR_secret_values: ${{ secrets.SECRET_VALUES }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
-
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.TERRAFORM_AWS_ROLE_ARN }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - run: terraform init -reconfigure
+      - name: Terraform Init
+        run: terraform init -reconfigure
 
-      - run: terraform plan -out=tfplan -var-file=production.tfvars
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -input=false \
+            -var-file=production.tfvars \
+            -out=tfplan
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: terraform/tfplan
 
-################################################################################
-# APPLY
-################################################################################
-
+  ################################################################################
+  # APPLY
+  ################################################################################
   apply:
-
+    name: Terraform Apply
     needs: plan
-
     runs-on: ubuntu-latest
-
     environment: production
-
     defaults:
       run:
         working-directory: terraform
-
+    env:
+      TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
+      TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_db_name: ${{ secrets.DB_NAME }}
+      TF_VAR_secret_values: ${{ secrets.SECRET_VALUES }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
           path: terraform
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.TERRAFORM_AWS_ROLE_ARN }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - run: terraform init -reconfigure
+      - name: Terraform Init
+        run: terraform init -reconfigure
 
-      - run: terraform apply -input=false tfplan
+      - name: Terraform Apply
+        id: terraform_apply
+        continue-on-error: true
+        run: terraform apply -input=false tfplan 2>&1 | tee terraform.log
 
-        
+      - name: Upload Terraform Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-log
+          path: terraform/terraform.log
+
+      - name: Setup Python
+        if: failure()
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install AI Dependencies
+        if: failure()
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r .github/requirements.txt
+
+      - name: AI DevOps Engineer
+        if: failure()
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python .github/scripts/ai_devops_engineer.py
+
+      - name: Publish AI Report
+        if: failure()
+        run: cat terraform/ai_report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload AI Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-report-apply
+          path: terraform/ai_report.md
+
+      - name: Fail Workflow
+        if: steps.terraform_apply.outcome == 'failure'
+        run: exit 1

@@ -4,12 +4,12 @@ provider "aws" {
 
 # VPC
 module "vpc" {
-  source     = "./modules/vpc"
-  cidr_block = var.vpc_cidr
-  kms_key_arn  = module.kms.kms_key_arn
-  environment  = var.environment
-  project_name = var.project_name
-  tags         = var.tags
+  source             = "./modules/vpc"
+  cidr_block         = var.vpc_cidr
+  kms_key_arn        = module.kms.kms_key_arn
+  environment        = var.environment
+  project_name       = var.project_name
+  tags               = var.tags
   flow_logs_role_arn = module.iam.flow_logs_role_arn
 }
 
@@ -47,14 +47,14 @@ module "routes" {
 
 
 module "db_sg" {
-  source         = "./modules/security-group-db"
-  vpc_id         = module.vpc.vpc_id
-  sg_name        = "db-new"
+  source  = "./modules/security-group-db"
+  vpc_id  = module.vpc.vpc_id
+  sg_name = "db-new"
   allowed_sg_ids = [
     module.node_group.node_security_group_id
   ]
   vpc_cidr = var.vpc_cidr
-  
+
 }
 
 module "vpc_sg" {
@@ -76,8 +76,8 @@ module "rds" {
   password           = var.db_password
   subnet_ids         = module.subnets.private_subnet_ids
   security_group_ids = [module.db_sg.sg_id]
-  kms_key_arn       = var.kms_key_arn
-  
+  kms_key_arn        = var.kms_key_arn
+
 
   engine_version    = var.db_engine_version
   instance_class    = var.db_instance_class
@@ -104,7 +104,7 @@ module "dynamodb" {
   hash_key     = var.dynamodb_hash_key
   billing_mode = var.dynamodb_billing_mode
   environment  = var.environment
-  kms_key_arn = module.kms.kms_key_arn
+  kms_key_arn  = module.kms.kms_key_arn
 
   tags = {
     Project = "stan-robot-shop"
@@ -149,8 +149,8 @@ module "irsa" {
   oidc_provider_url       = module.eks.oidc_issuer
   region                  = var.region
   karpenter_node_role_arn = module.iam.karpenter_node_role_arn
-  account_id  = var.account_id
-  environment = var.environment
+  account_id              = var.account_id
+  environment             = var.environment
 
   tags = var.tags
   env  = var.environment
@@ -251,7 +251,7 @@ module "ecr" {
 
   source = "./modules/ECR"
 
-  name = each.value
+  name        = each.value
   kms_key_arn = module.kms.kms_key_arn
 
   tags = {
@@ -299,11 +299,11 @@ module "cloudfront" {
 module "iam" {
   source = "./modules/IAM"
 
-  tags = var.tags
+  tags         = var.tags
   environment  = var.environment
   project_name = var.project_name
-  
-  
+
+
 }
 
 module "kms" {

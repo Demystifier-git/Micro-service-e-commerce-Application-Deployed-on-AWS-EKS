@@ -61,3 +61,5 @@ grafana_hostname    = "grafana.delightdavid.online"
 prometheus_hostname = "prometheus.delightdavid.online"
 
 certificate_arn = "arn:aws:acm:us-east-1:387041334219:certificate/e2dc15a3-8532-4239-b58e-60aa7caab0f5"
+account_id="387041334219"
+project_name = "robot-shop"

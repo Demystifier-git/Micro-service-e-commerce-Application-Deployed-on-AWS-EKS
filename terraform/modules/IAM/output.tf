@@ -19,3 +19,7 @@ output "karpenter_node_role_arn" {
 output "karpenter_instance_profile_name" {
   value = aws_iam_instance_profile.karpenter.name
 }
+
+output "flow_logs_role_arn" {
+  value = aws_iam_role.flow_logs.arn
+}

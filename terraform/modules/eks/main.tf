@@ -6,7 +6,15 @@ resource "aws_eks_cluster" "this" {
   vpc_config {
     subnet_ids              = var.private_subnets
     endpoint_private_access = true
-    endpoint_public_access  = true
+    endpoint_public_access  = false
+  }
+
+  encryption_config {
+    provider {
+      key_arn = var.kms_key_arn
+    }
+
+    resources = ["secrets"]
   }
 
   tags = var.tags

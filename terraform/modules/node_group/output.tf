@@ -5,4 +5,9 @@ output "node_group_names" {
   }
 }
 
+output "node_security_group_id" {
+  description = "Security group attached to EKS worker nodes"
+  value       = var.node_security_group_id
+}
+
 

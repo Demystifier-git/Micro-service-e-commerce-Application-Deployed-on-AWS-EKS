@@ -36,5 +36,10 @@ variable "tags" {
   default     = {}
 }
 
+variable "kms_key_arn" {
+  description = "KMS key ARN used to encrypt Kubernetes secrets"
+  type        = string
+}
+
 
 

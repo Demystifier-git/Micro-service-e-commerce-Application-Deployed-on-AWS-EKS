@@ -36,3 +36,13 @@ variable "karpenter_node_role_arn" {
   description = "IAM role ARN used by Karpenter launched nodes"
   type        = string
 }
+
+variable "environment" {
+  description = "Environment name (dev, staging, prod)"
+  type        = string
+}
+
+variable "account_id" {
+  description = "account id"
+  type        = string
+}

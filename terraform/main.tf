@@ -6,6 +6,11 @@ provider "aws" {
 module "vpc" {
   source     = "./modules/vpc"
   cidr_block = var.vpc_cidr
+  kms_key_arn  = module.kms.kms_key_arn
+  environment  = var.environment
+  project_name = var.project_name
+  tags         = var.tags
+  flow_logs_role_arn = module.iam.flow_logs_role_arn
 }
 
 # Subnets
@@ -40,24 +45,23 @@ module "routes" {
   private_subnet_ids = module.subnets.private_subnet_ids
 }
 
-# Security Groups
-module "web_sg" {
-  source  = "./modules/security-group-web"
-  vpc_id  = module.vpc.vpc_id
-  sg_name = "web-sg"
-}
 
 module "db_sg" {
   source         = "./modules/security-group-db"
   vpc_id         = module.vpc.vpc_id
   sg_name        = "db-new"
-  allowed_sg_ids = [module.web_sg.sg_id]
+  allowed_sg_ids = [
+    module.node_group.node_security_group_id
+  ]
+  vpc_cidr = var.vpc_cidr
+  
 }
 
 module "vpc_sg" {
   source  = "./modules/security-group-VPC"
   vpc_id  = module.vpc.vpc_id
   sg_name = "vpc-sg"
+
 }
 
 
@@ -72,6 +76,8 @@ module "rds" {
   password           = var.db_password
   subnet_ids         = module.subnets.private_subnet_ids
   security_group_ids = [module.db_sg.sg_id]
+  kms_key_arn       = var.kms_key_arn
+  
 
   engine_version    = var.db_engine_version
   instance_class    = var.db_instance_class
@@ -82,9 +88,11 @@ module "s3" {
   source      = "./modules/S3"
   bucket_name = var.bucket_name
   environment = var.environment
+  kms_key_arn = module.kms.kms_key_arn
+
 
   tags = {
-    Project = "development-bucket"
+    Project = "production-bucket"
     Env     = var.environment
   }
 }
@@ -96,6 +104,7 @@ module "dynamodb" {
   hash_key     = var.dynamodb_hash_key
   billing_mode = var.dynamodb_billing_mode
   environment  = var.environment
+  kms_key_arn = module.kms.kms_key_arn
 
   tags = {
     Project = "stan-robot-shop"
@@ -114,6 +123,7 @@ module "eks" {
   cluster_version = var.cluster_version
   vpc_id          = module.vpc.vpc_id
   private_subnets = module.subnets.private_subnet_ids
+  kms_key_arn     = module.kms.kms_key_arn
   tags            = var.tags
 }
 
@@ -139,6 +149,8 @@ module "irsa" {
   oidc_provider_url       = module.eks.oidc_issuer
   region                  = var.region
   karpenter_node_role_arn = module.iam.karpenter_node_role_arn
+  account_id  = var.account_id
+  environment = var.environment
 
   tags = var.tags
   env  = var.environment
@@ -205,6 +217,7 @@ module "secrets" {
 
   name        = "${var.environment}/${each.value.service}/${each.value.purpose}"
   environment = var.environment
+  kms_key_arn = module.kms.kms_key_arn
 
   secret_value = var.secret_values[each.key]
 }
@@ -239,6 +252,7 @@ module "ecr" {
   source = "./modules/ECR"
 
   name = each.value
+  kms_key_arn = module.kms.kms_key_arn
 
   tags = {
     Environment = var.environment
@@ -284,6 +298,29 @@ module "cloudfront" {
 
 module "iam" {
   source = "./modules/IAM"
+
+  tags = var.tags
+  environment  = var.environment
+  project_name = var.project_name
+  
+  
+}
+
+module "kms" {
+  source = "./modules/KMS"
+
+  project_name = var.project_name
+  environment  = var.environment
+}
+
+module "flowlogs" {
+  source = "./modules/flowlogs"
+
+  vpc_id       = module.vpc.vpc_id
+  iam_role_arn = module.iam.flow_logs_role_arn
+
+  project_name = var.project_name
+  environment  = var.environment
 
   tags = var.tags
 }

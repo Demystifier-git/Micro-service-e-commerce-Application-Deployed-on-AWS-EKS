@@ -9,7 +9,7 @@ variable "region" {
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC"
   type        = string
-  default     = "10.0.0.0/16"
+  
 }
 
 variable "availability_zones" {
@@ -151,6 +151,16 @@ variable "prometheus_hostname" {
 
 variable "certificate_arn" {
   description = "ACM certificate ARN used by monitoring ingress"
+  type        = string
+}
+
+variable "account_id" {
+  description = "account id"
+  type        = string
+}
+
+variable "kms_key_arn" {
+  description = "KMS key ARN used to encrypt the RDS instance"
   type        = string
 }
 

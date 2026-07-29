@@ -22,3 +22,7 @@ output "bucket_regional_domain_name" {
   description = "The regional domain name of the S3 bucket"
   value       = aws_s3_bucket.this.bucket_regional_domain_name
 }
+
+output "logs_bucket_domain_name" {
+  value = aws_s3_bucket.logs.bucket_domain_name
+}

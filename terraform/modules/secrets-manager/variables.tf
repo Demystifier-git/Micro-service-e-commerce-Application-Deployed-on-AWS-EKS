@@ -14,3 +14,7 @@ variable "secret_value" {
   type      = any
   sensitive = true
 }
+
+variable "kms_key_arn" {
+  type = string
+}

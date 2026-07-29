@@ -10,3 +10,8 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "kms_key_arn" {
+  description = "ARN of the KMS key"
+  type        = string
+}

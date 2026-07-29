@@ -14,6 +14,11 @@ resource "aws_db_instance" "this" {
   username = var.username
   password = var.password
 
+  storage_encrypted = true
+  kms_key_id        = var.kms_key_arn
+  backup_retention_period = 7
+  deletion_protection     = true
+
   vpc_security_group_ids = var.security_group_ids
   db_subnet_group_name   = aws_db_subnet_group.this.name
 

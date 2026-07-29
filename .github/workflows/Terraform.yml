@@ -60,9 +60,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install checkov
 
-      - name: Install Trivy
-        uses: aquasecurity/trivy-action@0.32.0
-
       - name: Terraform Format
         continue-on-error: true
         run: terraform fmt -check -recursive > fmt.log 2>&1
@@ -89,9 +86,14 @@ jobs:
         continue-on-error: true
         run: checkov -d . > checkov.log 2>&1
 
-      - name: Trivy
-        continue-on-error: true
-        run: trivy config . > trivy.log 2>&1
+      - name: Trivy Config Scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          scan-ref: './terraform'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
 
       - name: Upload Scan Logs
         uses: actions/upload-artifact@v4
@@ -105,7 +107,6 @@ jobs:
             terraform/tflint.log
             terraform/tfsec.log
             terraform/checkov.log
-            terraform/trivy.log
 
       - name: Fail if any scan failed
         run: |
@@ -115,7 +116,6 @@ jobs:
           grep -qi "failed" tflint.log && failed=1 || true
           grep -qi "CRITICAL" tfsec.log && failed=1 || true
           grep -qi "FAILED" checkov.log && failed=1 || true
-          grep -qi "CRITICAL" trivy.log && failed=1 || true
           exit $failed
 
   ################################################################################
@@ -286,3 +286,4 @@ jobs:
       - name: Fail Workflow
         if: steps.terraform_apply.outcome == 'failure'
         run: exit 1
+

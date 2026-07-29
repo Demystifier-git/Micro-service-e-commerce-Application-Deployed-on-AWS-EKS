@@ -76,7 +76,7 @@ module "rds" {
   password           = var.db_password
   subnet_ids         = module.subnets.private_subnet_ids
   security_group_ids = [module.db_sg.sg_id]
-  kms_key_arn        = var.kms_key_arn
+  kms_key_arn = module.kms.kms_key_arn
 
 
   engine_version    = var.db_engine_version

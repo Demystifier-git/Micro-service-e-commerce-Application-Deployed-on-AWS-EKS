@@ -19,13 +19,13 @@ db_engine_version    = "8.0"
 db_instance_class    = "db.t3.micro"
 db_allocated_storage = 20
 
-bucket_name   = "demystifier-bucket-387041334219"
+bucket_name = "demystifier-bucket-387041334219"
 
 
 dynamodb_table_name   = "terraform-demo-table"
 dynamodb_hash_key     = "id"
 dynamodb_billing_mode = "PAY_PER_REQUEST"
-cluster_name          = "development-cluster"
+cluster_name          = "production-cluster"
 cluster_version       = "1.33"
 
 

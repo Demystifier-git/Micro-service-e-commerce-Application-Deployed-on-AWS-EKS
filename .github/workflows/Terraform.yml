@@ -149,7 +149,6 @@ jobs:
 
       - name: Terraform Apply
         id: terraform_apply
-        continue-on-error: true
         run: |
           set +e
           terraform apply -input=false tfplan 2>&1 | tee terraform.log

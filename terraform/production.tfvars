@@ -63,7 +63,9 @@ certificate_arn = "arn:aws:acm:us-east-1:387041334219:certificate/e2dc15a3-8532-
 account_id      = "387041334219"
 project_name    = "robot-shop"
 
-ec2_name = "self-hosted-runner"
+ec2_name = "self-hosted-runner/monitoring-server"
 
 hosted_zone_id = "Z0085504O5UWBH6JJCBD"
+ec2_ami = "ami-0b6c6ebed2801a5cb"
+instance_type    = "m7i-flex.large"
 

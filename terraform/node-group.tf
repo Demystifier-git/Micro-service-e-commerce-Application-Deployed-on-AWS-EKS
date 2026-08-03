@@ -1,25 +1,57 @@
-# ----------------------------
-# NODE SECURITY GROUP
-# ----------------------------
+
+# NODE SECURITY GROUP (Hardened)
+
 
 resource "aws_security_group" "node_sg" {
   name        = "eks-node-sg"
   description = "Security group for EKS worker nodes"
   vpc_id      = module.vpc.vpc_id
 
-  # Allow ALL outbound traffic (required for:
-  # - pulling images from ECR
-  # - reaching EKS API
-  # - downloading bootstrap scripts)
+  # Restrict outbound traffic to only what is required:
+  # - Monitoring EC2 SG (Loki, Prometheus, Tempo, Grafana)
+  # - AWS VPC endpoints (ECR, S3, STS, etc.)
+
+  # Loki logs
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 3100
+    to_port         = 3100
+    protocol        = "tcp"
+    security_groups = [module.web_sg.security_group_id] # EC2 SG output
+    description     = "Send logs to Loki"
+  }
+
+  # Prometheus metrics
+  egress {
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    security_groups = [module.web_sg.security_group_id]
+    description     = "Send metrics to Prometheus"
+  }
+
+  # Tempo traces
+  egress {
+    from_port       = 4317
+    to_port         = 4317
+    protocol        = "tcp"
+    security_groups = [module.web_sg.security_group_id]
+    description     = "Send traces to Tempo"
+  }
+
+
+
+  # Example: allow HTTPS to AWS VPC endpoints (ECR, S3, STS, etc.)
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"] # replace with your VPC endpoint CIDR
+    description = "Allow HTTPS to AWS service endpoints"
   }
 
   tags = var.tags
 }
+
 
 # ----------------------------
 # CLUSTER SECURITY GROUP RULE

@@ -159,6 +159,34 @@ variable "account_id" {
   type        = string
 }
 
+variable "ec2_ami" {
+  description = "The AMI ID to use for EC2 instances"
+  type        = string
+}
+
+variable "instance_type" {
+  type = string
+}
+
+
+variable "ec2_name" {
+  description = "Name tag for the EC2 instance"
+  type        = string
+}
+
+variable "domain_name" {
+  description = "main Domain name for the application"
+  type        = string
+}
+
+variable "hosted_zone_id" {
+  description = "Route53 hosted zone ID"
+  type        = string
+}
+
+
+
+
 
 
 

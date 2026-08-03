@@ -86,6 +86,10 @@ output "node_security_group_id" {
   value       = aws_security_group.node_sg.id
 }
 
+output "vpc_endpoint_ids" {
+  value = module.vpc_endpoints.endpoint_ids
+}
+
 
 
 

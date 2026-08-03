@@ -1,21 +1,24 @@
-resource "helm_release" "kube_prometheus_stack" {
-  name             = "monitoring"
-  repository       = "https://prometheus-community.github.io/helm-charts"
-  chart            = "kube-prometheus-stack"
+# Promtail DaemonSet via Helm
+resource "helm_release" "promtail" {
+  name             = "promtail"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "promtail"
   namespace        = var.namespace
   create_namespace = true
 
   values = [
-    templatefile("${path.module}/values.yaml.tpl", {
-      grafana_admin_secret = "grafana-admin"
-      grafana_smtp_secret  = "grafana-smtp"
-      grafana_hostname     = var.grafana_hostname
-      prometheus_hostname  = var.prometheus_hostname
-      certificate_arn      = var.certificate_arn
+    yamlencode({
+      config = {
+        clients = [{
+          # Use DNS name instead of IP
+          url = "http://loki.delightdavid.online:3100/loki/api/v1/push"
+        }]
+      }
     })
   ]
 }
 
+# OpenTelemetry Collector via Helm
 resource "helm_release" "otel_collector" {
   name       = "otel-collector"
   repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
@@ -23,10 +26,15 @@ resource "helm_release" "otel_collector" {
   namespace  = var.namespace
 
   values = [
-    file("${path.module}/otel-values.yaml")
+    templatefile("${path.module}/otel-values.yaml.tpl", {
+      loki_dns        = "loki.delightdavid.online"
+      prometheus_dns  = "prometheus.delightdavid.online"
+      tempo_dns       = "tempo.delightdavid.online"
+    })
   ]
 
   depends_on = [
-    helm_release.kube_prometheus_stack
+    helm_release.promtail
   ]
 }
+

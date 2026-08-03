@@ -169,9 +169,7 @@ module "monitoring" {
 
   namespace = var.namespace
 
-  grafana_hostname    = var.grafana_hostname
-  prometheus_hostname = var.prometheus_hostname
-  certificate_arn     = var.certificate_arn
+
 }
 
 module "karpenter" {
@@ -261,38 +259,8 @@ module "ecr" {
 }
 
 
-module "tempo" {
-  source = "./modules/tempo"
-
-  namespace = var.namespace
-}
-
-module "cloudfront" {
-
-  source = "./modules/cloudfront"
-
-  project_name = var.project_name
-
-  environment = var.environment
-
-  bucket_id = module.s3.bucket_id
-
-  bucket_arn = module.s3.bucket_arn
-
-  bucket_regional_domain_name = module.s3.bucket_regional_domain_name
-
-  acm_certificate_arn = var.certificate_arn
-
-  aliases = [
-
-    "app.delightdavid.online"
-
-  ]
-
-  cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
 
 
-}
 
 
 
@@ -323,4 +291,72 @@ module "flowlogs" {
   environment  = var.environment
 
   tags = var.tags
+}
+
+# EC2
+module "ec2" {
+  source = "./modules/ec2"
+
+  ec2_name = var.ec2_name
+
+
+  # EC2 expects ONE subnet
+  subnet_id = module.subnets.private_subnet_ids[0]
+
+  security_group_ids = [module.web_sg.security_group_id]
+
+  ami           = var.ec2_ami
+  instance_type = var.instance_type
+  key_name      = null
+}
+
+# Security Groups
+module "web_sg" {
+  source = "./modules/security-group-ec2"
+
+  vpc_id  = module.vpc.vpc_id
+  sg_name = "ec2-sg"
+
+  lb_security_group_id = module.lb_ssl.lb_security_group_id
+
+
+
+}
+
+# Load Balancer + SSL
+module "lb_ssl" {
+  source = "./modules/lb_ssl"
+
+  vpc_id = module.vpc.vpc_id
+
+  public_subnet_ids = module.subnets.public_subnet_ids
+
+  target_instance_id = module.ec2.instance_id
+
+  domain_name     = var.domain_name
+  certificate_arn = var.certificate_arn
+
+}
+
+# Route53
+module "route53" {
+  source = "./modules/route53"
+
+  hosted_zone_id = var.hosted_zone_id
+
+  domain_name = var.domain_name
+
+
+  lb_dns_name = module.lb_ssl.lb_dns_name
+  lb_zone_id  = module.lb_ssl.lb_zone_id
+}
+
+
+module "vpc_endpoints" {
+  source                  = "./modules/vpc-endpoints"
+  vpc_id                  = module.vpc.vpc_id
+  private_subnet_ids      = module.vpc.private_subnet_ids
+  private_route_table_ids = module.vpc.private_route_table_ids
+  region                  = var.region
+  node_sg_id              = aws_security_group.node_sg.id
 }

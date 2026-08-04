@@ -4,6 +4,7 @@ terraform {
     key            = "prod/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "minishop-prod-terraform-locks"
+    use_lockfile   = true
     encrypt        = true
   }
 }

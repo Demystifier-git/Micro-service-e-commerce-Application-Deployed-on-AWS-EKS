@@ -1,5 +1,5 @@
 # ----------------------------
-# NODE GROUPS (ON-DEMAND + SPOT)
+# NODE GROUPS (ON-DEMAND)
 # ----------------------------
 
 resource "aws_eks_node_group" "this" {

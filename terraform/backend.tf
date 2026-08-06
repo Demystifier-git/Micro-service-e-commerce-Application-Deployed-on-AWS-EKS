@@ -5,5 +5,7 @@ terraform {
     region         = "us-east-1"
     dynamodb_table = "minishop-prod-terraform-locks"
     encrypt        = true
+    use_lockfile = true
+
   }
 }

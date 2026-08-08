@@ -33,6 +33,23 @@ resource "aws_instance" "this" {
   key_name               = var.key_name
   vpc_security_group_ids = var.security_group_ids
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+
+  user_data = <<-EOF
+              #!/bin/bash
+              # Update package lists
+              apt-get update -y
+
+              # Install snap if not already installed
+              apt-get install -y snapd
+
+              # Install the SSM Agent via snap
+              snap install amazon-ssm-agent --classic
+
+              # Enable and start the SSM Agent service
+              systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
+              systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
+              EOF
+
   tags = {
     Name = var.ec2_name
   }

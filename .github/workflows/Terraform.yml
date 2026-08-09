@@ -15,11 +15,29 @@ env:
 jobs:
 
   ################################################################################
+  # TEST RUNNER CONNECTIVITY
+  ################################################################################
+  test-runner:
+    name: Test Runner Connectivity
+    runs-on: [self-hosted, ubuntu]   # 👈 self-hosted runner
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Print Runner Info
+        run: |
+          echo "✅ Hello from self-hosted runner!"
+          echo "Hostname: $(hostname)"
+          echo "Date: $(date)"
+          echo "Working directory: $(pwd)"
+
+  ################################################################################
   # TERRAFORM PLAN
   ################################################################################
   plan:
     name: Terraform Plan
-    runs-on: ubuntu-latest
+    needs: test-runner              # 👈 ensures test runs first
+    runs-on: [self-hosted, ubuntu]
     environment:
       name: production
     defaults:
@@ -114,7 +132,7 @@ jobs:
   apply:
     name: Terraform Apply
     needs: plan
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ubuntu]
     environment:
       name: production
     defaults:

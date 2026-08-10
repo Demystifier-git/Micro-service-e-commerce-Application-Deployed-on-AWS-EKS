@@ -49,6 +49,15 @@ resource "aws_security_group" "node_sg" {
     description = "Allow HTTPS to AWS service endpoints"
   }
 
+  egress {
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["10.0.3.0/24","10.0.2.0/24"]
+  description = "Allow HTTPS to EKS control plane"
+}
+
+
   tags = var.tags
 }
 

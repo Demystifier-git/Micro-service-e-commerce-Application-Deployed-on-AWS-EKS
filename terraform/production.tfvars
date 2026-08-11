@@ -51,7 +51,7 @@ node_groups = {
 }
 
 eks_namespace = "external-secrets"
-repo_url      = "https://github.com/Demystifier-git/Micro-service-E_commerce-Application-Deployed-on-AWS-EKS.git"
+
 namespace     = "monitoring"
 
 domain_name = "delightdavid.online"

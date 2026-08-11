@@ -19,7 +19,7 @@ jobs:
   ################################################################################
   test-runner:
     name: Test Runner Connectivity
-    runs-on: [self-hosted, ubuntu]   # 👈 self-hosted runner
+    runs-on: [ubuntu]   # 👈 self-hosted runner
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -37,7 +37,7 @@ jobs:
   plan:
     name: Terraform Plan
     needs: test-runner              # 👈 ensures test runs first
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [ ubuntu]
     environment:
       name: production
     defaults:
@@ -132,7 +132,7 @@ jobs:
   apply:
     name: Terraform Apply
     needs: plan
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [ubuntu]
     environment:
       name: production
     defaults:

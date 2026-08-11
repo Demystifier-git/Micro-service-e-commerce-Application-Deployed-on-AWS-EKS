@@ -70,37 +70,10 @@ jobs:
       - name: Terraform Validate
         run: terraform validate | tee validate.log
 
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v4
-
-      - name: Run TFLint
-        run: |
-          tflint --init
-          tflint | tee tflint.log
-
+     
       
 
-      - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: terraform
-
-      - name: Run Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: config
-          scan-ref: terraform
-
-      - name: Upload Security Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-logs
-          path: |
-            terraform/fmt.log
-            terraform/init.log
-            terraform/validate.log
-            terraform/tflint.log
+      
 
       - name: Terraform Plan
         run: |

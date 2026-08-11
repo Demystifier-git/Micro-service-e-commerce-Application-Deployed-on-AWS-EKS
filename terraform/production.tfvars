@@ -52,7 +52,7 @@ node_groups = {
 
 eks_namespace = "external-secrets"
 
-namespace     = "monitoring"
+namespace = "monitoring"
 
 domain_name = "delightdavid.online"
 

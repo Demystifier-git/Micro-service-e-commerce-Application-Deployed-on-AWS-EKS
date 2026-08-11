@@ -319,7 +319,7 @@ module "web_sg" {
   sg_name = "ec2-sg"
 
   lb_security_group_id = module.lb_ssl.lb_security_group_id
-   vpc_cidr = module.vpc.vpc_cidr
+  vpc_cidr             = module.vpc.vpc_cidr
 
 
 
@@ -355,13 +355,13 @@ module "route53" {
 
 
 module "vpc_endpoints" {
-  source                  = "./modules/vpc-endpoints"
-  vpc_id                  = module.vpc.vpc_id
+  source = "./modules/vpc-endpoints"
+  vpc_id = module.vpc.vpc_id
   # Pass route table IDs from routes module
   private_subnet_ids     = module.subnets.private_subnet_ids
   public_route_table_id  = module.routes.public_route_table_id
   private_route_table_id = module.routes.private_route_table_id
-  region                  = var.region
-  node_sg_id              = aws_security_group.node_sg.id
-  web_sg_id=       module.web_sg.security_group_id
+  region                 = var.region
+  node_sg_id             = aws_security_group.node_sg.id
+  web_sg_id              = module.web_sg.security_group_id
 }

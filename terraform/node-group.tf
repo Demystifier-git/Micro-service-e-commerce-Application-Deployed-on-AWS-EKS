@@ -96,7 +96,7 @@ resource "aws_security_group_rule" "cluster_ingress_from_runner" {
   from_port                = 443
   to_port                  = 443
   protocol                 = "tcp"
-  security_group_id        = module.eks.cluster_security_group_id   # cluster SG is the target
-  source_security_group_id = module.web_sg.security_group_id        # runner SG is the source
+  security_group_id        = module.eks.cluster_security_group_id # cluster SG is the target
+  source_security_group_id = module.web_sg.security_group_id      # runner SG is the source
 }
 

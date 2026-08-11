@@ -19,7 +19,10 @@ resource "aws_vpc_endpoint" "ecr_api" {
   service_name      = "com.amazonaws.${var.region}.ecr.api"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-  security_group_ids = [var.node_sg_id]
+  security_group_ids = [
+    var.node_sg_id,
+    var.web_sg_id   # passed in from root
+  ]
 }
 
 # ECR DKR Interface endpoint
@@ -28,7 +31,10 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   service_name      = "com.amazonaws.${var.region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-  security_group_ids = [var.node_sg_id]
+  security_group_ids = [
+    var.node_sg_id,
+    var.web_sg_id   # passed in from root
+  ]
 }
 
 # STS Interface endpoint
@@ -37,7 +43,10 @@ resource "aws_vpc_endpoint" "sts" {
   service_name      = "com.amazonaws.${var.region}.sts"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-  security_group_ids = [var.node_sg_id]
+   security_group_ids = [
+    var.node_sg_id,
+    var.web_sg_id   # passed in from root
+  ]
 }
 
 # CloudWatch Logs Interface endpoint
@@ -46,7 +55,10 @@ resource "aws_vpc_endpoint" "logs" {
   service_name      = "com.amazonaws.${var.region}.logs"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-  security_group_ids = [var.node_sg_id]
+   security_group_ids = [
+    var.node_sg_id,
+    var.web_sg_id   # passed in from root
+  ]
 }
 
 # EC2 Interface endpoint
@@ -55,7 +67,10 @@ resource "aws_vpc_endpoint" "ec2" {
   service_name      = "com.amazonaws.${var.region}.ec2"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-  security_group_ids = [var.node_sg_id]
+   security_group_ids = [
+    var.node_sg_id,
+    var.web_sg_id   # passed in from root
+  ]
 }
 
 # Autoscaling Interface endpoint
@@ -64,7 +79,10 @@ resource "aws_vpc_endpoint" "autoscaling" {
   service_name      = "com.amazonaws.${var.region}.autoscaling"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-  security_group_ids = [var.node_sg_id]
+  security_group_ids = [
+    var.node_sg_id,
+    var.web_sg_id   # passed in from root
+  ]
 }
 
 # KMS Interface endpoint
@@ -73,5 +91,8 @@ resource "aws_vpc_endpoint" "kms" {
   service_name      = "com.amazonaws.${var.region}.kms"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-  security_group_ids = [var.node_sg_id]
+   security_group_ids = [
+    var.node_sg_id,
+    var.web_sg_id   # passed in from root
+  ]
 }

@@ -90,19 +90,13 @@ resource "aws_security_group_rule" "node_to_node" {
   self              = true
 }
 
-# ----------------------------
-# CLUSTER → RUNNER COMMUNICATION
-# ----------------------------
-resource "aws_security_group_rule" "cluster_to_runner" {
-  type        = "ingress"
-  description = "Allow EKS cluster to communicate with runner SG"
-
-  from_port = 443
-  to_port   = 443
-  protocol  = "tcp"
-
-  # Runner SG is the target
-  security_group_id        = module.web_sg.security_group_id
-  # Cluster SG is the source
-  source_security_group_id = module.eks.cluster_security_group_id
+resource "aws_security_group_rule" "cluster_ingress_from_runner" {
+  type                     = "ingress"
+  description              = "Allow runner SG to reach EKS API server"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = module.eks.cluster_security_group_id   # cluster SG is the target
+  source_security_group_id = module.web_sg.security_group_id        # runner SG is the source
 }
+

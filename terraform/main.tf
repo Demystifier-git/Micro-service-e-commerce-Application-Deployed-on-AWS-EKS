@@ -363,4 +363,5 @@ module "vpc_endpoints" {
   private_route_table_id = module.routes.private_route_table_id
   region                  = var.region
   node_sg_id              = aws_security_group.node_sg.id
+  web_sg_id=       module.web_sg.security_group_id
 }

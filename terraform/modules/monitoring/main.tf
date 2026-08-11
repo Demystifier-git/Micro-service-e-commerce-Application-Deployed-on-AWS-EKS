@@ -8,6 +8,7 @@ resource "helm_release" "promtail" {
 
   values = [
     yamlencode({
+      mode = "daemonset"
       config = {
         clients = [{
           # Use DNS name instead of IP

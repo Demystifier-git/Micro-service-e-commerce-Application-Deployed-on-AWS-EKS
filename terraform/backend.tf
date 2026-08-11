@@ -3,6 +3,6 @@ terraform {
     bucket         = "minishop-prod-terraform-state"
     key            = "prod/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-locks"
+    dynamodb_table = "terraform-locks-2"
   }
 }

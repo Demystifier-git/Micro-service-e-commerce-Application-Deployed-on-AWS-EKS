@@ -5,7 +5,7 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_endpoint_type = "Gateway"
 
   # Use route table IDs, not subnet IDs
-   route_table_ids = [
+  route_table_ids = [
     var.private_route_table_id,
     var.public_route_table_id
   ]
@@ -21,7 +21,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
   subnet_ids        = var.private_subnet_ids
   security_group_ids = [
     var.node_sg_id,
-    var.web_sg_id   # passed in from root
+    var.web_sg_id # passed in from root
   ]
 }
 
@@ -33,7 +33,7 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   subnet_ids        = var.private_subnet_ids
   security_group_ids = [
     var.node_sg_id,
-    var.web_sg_id   # passed in from root
+    var.web_sg_id # passed in from root
   ]
 }
 
@@ -43,9 +43,9 @@ resource "aws_vpc_endpoint" "sts" {
   service_name      = "com.amazonaws.${var.region}.sts"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-   security_group_ids = [
+  security_group_ids = [
     var.node_sg_id,
-    var.web_sg_id   # passed in from root
+    var.web_sg_id # passed in from root
   ]
 }
 
@@ -55,9 +55,9 @@ resource "aws_vpc_endpoint" "logs" {
   service_name      = "com.amazonaws.${var.region}.logs"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-   security_group_ids = [
+  security_group_ids = [
     var.node_sg_id,
-    var.web_sg_id   # passed in from root
+    var.web_sg_id # passed in from root
   ]
 }
 
@@ -67,9 +67,9 @@ resource "aws_vpc_endpoint" "ec2" {
   service_name      = "com.amazonaws.${var.region}.ec2"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-   security_group_ids = [
+  security_group_ids = [
     var.node_sg_id,
-    var.web_sg_id   # passed in from root
+    var.web_sg_id # passed in from root
   ]
 }
 
@@ -81,7 +81,7 @@ resource "aws_vpc_endpoint" "autoscaling" {
   subnet_ids        = var.private_subnet_ids
   security_group_ids = [
     var.node_sg_id,
-    var.web_sg_id   # passed in from root
+    var.web_sg_id # passed in from root
   ]
 }
 
@@ -91,8 +91,8 @@ resource "aws_vpc_endpoint" "kms" {
   service_name      = "com.amazonaws.${var.region}.kms"
   vpc_endpoint_type = "Interface"
   subnet_ids        = var.private_subnet_ids
-   security_group_ids = [
+  security_group_ids = [
     var.node_sg_id,
-    var.web_sg_id   # passed in from root
+    var.web_sg_id # passed in from root
   ]
 }

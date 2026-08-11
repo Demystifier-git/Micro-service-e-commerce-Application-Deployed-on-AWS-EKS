@@ -27,9 +27,9 @@ resource "helm_release" "otel_collector" {
 
   values = [
     templatefile("${path.module}/otel-values.yaml.tpl", {
-      loki_dns        = "loki.delightdavid.online"
-      prometheus_dns  = "prometheus.delightdavid.online"
-      tempo_dns       = "tempo.delightdavid.online"
+      loki_dns       = "loki.delightdavid.online"
+      prometheus_dns = "prometheus.delightdavid.online"
+      tempo_dns      = "tempo.delightdavid.online"
     })
   ]
 

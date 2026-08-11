@@ -33,15 +33,7 @@ resource "helm_release" "otel_collector" {
     })
   ]
 
-  set {
-    name  = "image.repository"
-    value = "otel/opentelemetry-collector"
-  }
-
-  set {
-    name  = "image.tag"
-    value = "0.102.0"
-  }
+ 
 
   depends_on = [
     helm_release.promtail

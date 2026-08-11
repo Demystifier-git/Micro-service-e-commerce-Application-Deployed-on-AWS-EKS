@@ -19,7 +19,7 @@ jobs:
   ################################################################################
   test-runner:
     name: Test Runner Connectivity
-    runs-on: [self-hosted, ubuntu]   # 👈 self-hosted runner
+    runs-on: [self-hosted, ubuntu]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
   ################################################################################
   plan:
     name: Terraform Plan
-    needs: test-runner              # 👈 ensures test runs first
+    needs: test-runner
     runs-on: [self-hosted, ubuntu]
     environment:
       name: production
@@ -62,38 +62,31 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format
-        continue-on-error: true
-        run: terraform fmt -check -recursive > fmt.log 2>&1
+        run: terraform fmt -check -recursive | tee fmt.log
 
       - name: Terraform Init
-        continue-on-error: true
-        run: terraform init -reconfigure > init.log 2>&1
+        run: terraform init -reconfigure | tee init.log
 
       - name: Terraform Validate
-        continue-on-error: true
-        run: terraform validate > validate.log 2>&1
+        run: terraform validate | tee validate.log
 
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
 
       - name: Run TFLint
-        continue-on-error: true
         run: |
           tflint --init
-          tflint > tflint.log 2>&1
+          tflint | tee tflint.log
 
       - name: Run tfsec
-        continue-on-error: true
         uses: aquasecurity/tfsec-action@v1.0.3
 
       - name: Run Checkov
-        continue-on-error: true
         uses: bridgecrewio/checkov-action@master
         with:
           directory: terraform
 
       - name: Run Trivy
-        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: config
@@ -109,16 +102,13 @@ jobs:
             terraform/init.log
             terraform/validate.log
             terraform/tflint.log
-            terraform/tfsec.log
-            terraform/checkov.log
-            terraform/trivy.log
 
       - name: Terraform Plan
         run: |
           terraform plan \
             -input=false \
             -var-file=production.tfvars \
-            -out=tfplan
+            -out=tfplan | tee plan.log
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
@@ -157,7 +147,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init -reconfigure
+        run: terraform init -reconfigure | tee init.log
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
@@ -166,68 +156,12 @@ jobs:
           path: terraform
 
       - name: Terraform Apply
-        id: terraform_apply
         run: |
-          set +e
-          terraform apply -input=false tfplan 2>&1 | tee terraform.log
-          EXIT_CODE=${PIPESTATUS[0]}
-          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
-          exit $EXIT_CODE
+          terraform apply -input=false tfplan | tee apply.log
 
-      - name: Upload Terraform Log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-log
-          path: terraform/terraform.log
-
-      - name: Download Security Logs
-        if: steps.terraform_apply.outputs.exit_code != '0'
-        uses: actions/download-artifact@v4
-        with:
-          name: security-logs
-          path: terraform
-
-      - name: Setup Python
-        if: steps.terraform_apply.outputs.exit_code != '0'
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install AI Dependencies
-        if: steps.terraform_apply.outputs.exit_code != '0'
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r .github/requirements.txt
-
-      - name: Run AI DevOps Engineer
-        if: steps.terraform_apply.outputs.exit_code != '0'
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          python .github/scripts/ai_devops_engineer.py
-
-      - name: Publish AI Report
-        if: steps.terraform_apply.outputs.exit_code != '0'
-        run: |
-          cat terraform/ai_report.md >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload AI Report
-        if: steps.terraform_apply.outputs.exit_code != '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ai-report
-          path: terraform/ai_report.md
-
-      - name: Upload All Logs
+      - name: Upload Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: deployment-logs
-          path: |
-            terraform/*.log
-            terraform/*.md
-
-      - name: Fail Workflow
-        if: steps.terraform_apply.outputs.exit_code != '0'
-        run: exit 1
+          path: terraform/*.log

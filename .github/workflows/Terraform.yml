@@ -19,14 +19,14 @@ jobs:
   ################################################################################
   test-runner:
     name: Test Runner Connectivity
-    runs-on: [ubuntu]   # 👈 self-hosted runner
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Print Runner Info
         run: |
-          echo "✅ Hello from self-hosted runner!"
+          echo "✅ Hello from GitHub-hosted runner!"
           echo "Hostname: $(hostname)"
           echo "Date: $(date)"
           echo "Working directory: $(pwd)"
@@ -36,8 +36,8 @@ jobs:
   ################################################################################
   plan:
     name: Terraform Plan
-    needs: test-runner              # 👈 ensures test runs first
-    runs-on: [ ubuntu]
+    needs: test-runner
+    runs-on: ubuntu-latest
     environment:
       name: production
     defaults:
@@ -132,7 +132,7 @@ jobs:
   apply:
     name: Terraform Apply
     needs: plan
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     environment:
       name: production
     defaults:

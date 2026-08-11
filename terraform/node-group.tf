@@ -49,13 +49,7 @@ resource "aws_security_group" "node_sg" {
     description = "Allow HTTPS to AWS service endpoints"
   }
 
-  egress {
-  from_port   = 443
-  to_port     = 443
-  protocol    = "tcp"
-  cidr_blocks = ["10.0.3.0/24","10.0.2.0/24"]
-  description = "Allow HTTPS to EKS control plane"
-}
+
 
 
   tags = var.tags
@@ -94,4 +88,21 @@ resource "aws_security_group_rule" "node_to_node" {
 
   security_group_id = aws_security_group.node_sg.id
   self              = true
+}
+
+# ----------------------------
+# CLUSTER → RUNNER COMMUNICATION
+# ----------------------------
+resource "aws_security_group_rule" "cluster_to_runner" {
+  type        = "ingress"
+  description = "Allow EKS cluster to communicate with runner SG"
+
+  from_port = 443
+  to_port   = 443
+  protocol  = "tcp"
+
+  # Runner SG is the target
+  security_group_id        = module.web_sg.security_group_id
+  # Cluster SG is the source
+  source_security_group_id = module.eks.cluster_security_group_id
 }

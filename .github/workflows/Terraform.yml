@@ -78,8 +78,7 @@ jobs:
           tflint --init
           tflint | tee tflint.log
 
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
+      
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@master

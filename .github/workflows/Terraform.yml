@@ -70,11 +70,6 @@ jobs:
       - name: Terraform Validate
         run: terraform validate | tee validate.log
 
-     
-      
-
-      
-
       - name: Terraform Plan
         run: |
           terraform plan \
@@ -89,11 +84,27 @@ jobs:
           path: terraform/tfplan
 
   ################################################################################
+  # MANUAL APPROVAL
+  ################################################################################
+  approval:
+    name: Await Manual Approval
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          approvers: demystifier-git   # your GitHub username
+          minimum-approvals: 1
+          issue-title: "Terraform Apply Approval Needed"
+          issue-body: "Please approve to proceed with Terraform apply in production."
+
+  ################################################################################
   # TERRAFORM APPLY
   ################################################################################
   apply:
     name: Terraform Apply
-    needs: plan
+    needs: approval
     runs-on: [self-hosted, ubuntu]
     environment:
       name: production
@@ -128,8 +139,7 @@ jobs:
           path: terraform
 
       - name: Terraform Apply
-        run: |
-          terraform apply -input=false tfplan | tee apply.log
+        run: terraform apply -input=false terraform/tfplan | tee apply.log
 
       - name: Upload Logs
         if: always()

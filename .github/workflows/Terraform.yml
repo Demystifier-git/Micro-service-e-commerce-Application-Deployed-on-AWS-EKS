@@ -84,30 +84,14 @@ jobs:
           path: terraform/tfplan
 
   ################################################################################
-  # MANUAL APPROVAL
-  ################################################################################
-  approval:
-    name: Await Manual Approval
-    needs: plan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Require Approval
-        uses: trstringer/manual-approval@v1
-        with:
-          approvers: demystifier-git   # your GitHub username
-          minimum-approvals: 1
-          issue-title: "Terraform Apply Approval Needed"
-          issue-body: "Please approve to proceed with Terraform apply in production."
-
-  ################################################################################
-  # TERRAFORM APPLY
+  # TERRAFORM APPLY (requires manual approval in GitHub Environments)
   ################################################################################
   apply:
     name: Terraform Apply
-    needs: approval
+    needs: plan
     runs-on: [self-hosted, ubuntu]
     environment:
-      name: production
+      name: production   # approval required here
     defaults:
       run:
         working-directory: terraform
@@ -147,3 +131,4 @@ jobs:
         with:
           name: deployment-logs
           path: terraform/*.log
+

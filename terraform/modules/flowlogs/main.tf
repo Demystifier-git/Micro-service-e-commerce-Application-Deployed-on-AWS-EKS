@@ -9,8 +9,10 @@ resource "aws_flow_log" "this" {
   vpc_id       = var.vpc_id
   traffic_type = "ALL"
 
+  # Destination type must be cloud-watch-logs
   log_destination_type = "cloud-watch-logs"
-  log_group_name       = aws_cloudwatch_log_group.this.name
+  # Use ARN instead of name
+  log_destination      = aws_cloudwatch_log_group.this.arn
 
   iam_role_arn = var.iam_role_arn
 

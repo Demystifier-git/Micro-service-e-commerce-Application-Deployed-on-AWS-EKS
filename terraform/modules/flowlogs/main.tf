@@ -12,7 +12,7 @@ resource "aws_flow_log" "this" {
   # Destination type must be cloud-watch-logs
   log_destination_type = "cloud-watch-logs"
   # Use ARN instead of name
-  log_destination      = aws_cloudwatch_log_group.this.arn
+  log_destination = aws_cloudwatch_log_group.this.arn
 
   iam_role_arn = var.iam_role_arn
 

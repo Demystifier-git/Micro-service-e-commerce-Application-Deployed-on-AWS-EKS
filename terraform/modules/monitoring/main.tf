@@ -8,7 +8,7 @@ resource "helm_release" "promtail" {
 
   values = [
     yamlencode({
-      
+
       config = {
         clients = [{
           # Use DNS name instead of IP
@@ -28,7 +28,7 @@ resource "helm_release" "otel_collector" {
 
   values = [
     yamlencode({
-      mode = "daemonset"   # 
+      mode = "daemonset" # 
     }),
     templatefile("${path.module}/otel-values.yaml.tpl", {
       loki_dns       = "loki.delightdavid.online"

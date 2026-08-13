@@ -62,16 +62,23 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format
-        run: terraform fmt -check -recursive | tee fmt.log
+        run: |
+          set -o pipefail
+          terraform fmt -check -recursive | tee fmt.log
 
       - name: Terraform Init
-        run: terraform init -reconfigure | tee init.log
+        run: |
+          set -o pipefail
+          terraform init -reconfigure | tee init.log
 
       - name: Terraform Validate
-        run: terraform validate | tee validate.log
+        run: |
+          set -o pipefail
+          terraform validate | tee validate.log
 
       - name: Terraform Plan
         run: |
+          set -o pipefail
           terraform plan \
             -input=false \
             -var-file=production.tfvars \
@@ -114,7 +121,9 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init -reconfigure | tee init.log
+        run: |
+          set -o pipefail
+          terraform init -reconfigure | tee init.log
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
@@ -123,7 +132,9 @@ jobs:
           path: terraform
 
       - name: Terraform Apply
-        run: terraform apply -input=false terraform/tfplan | tee apply.log
+        run: |
+          set -o pipefail
+          terraform apply -input=false tfplan | tee apply.log
 
       - name: Upload Logs
         if: always()

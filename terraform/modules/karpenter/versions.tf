@@ -11,7 +11,7 @@ terraform {
     kubectl = {
       source  = "gavinbunney/kubectl" # must match your root
       version = "~> 1.14"
+    }
   }
-}
 
 }

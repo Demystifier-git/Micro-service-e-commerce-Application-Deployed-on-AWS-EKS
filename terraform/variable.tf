@@ -184,6 +184,10 @@ variable "hosted_zone_id" {
   type        = string
 }
 
+variable "lb_security_group_id" {
+  description = "Load balancer security group id"
+  type        = string
+}
 
 
 

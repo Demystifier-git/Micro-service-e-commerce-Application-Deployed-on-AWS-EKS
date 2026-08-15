@@ -170,7 +170,7 @@ module "monitoring" {
 
   namespace = var.namespace
 
-   providers = {
+  providers = {
     kubernetes = kubernetes
     helm       = helm
     kubectl    = kubectl
@@ -189,7 +189,7 @@ module "karpenter" {
   iam_role_arn     = module.irsa.karpenter_role_arn
   instance_profile = module.iam.karpenter_instance_profile_name
 
-   providers = {
+  providers = {
     kubernetes = kubernetes
     helm       = helm
     kubectl    = kubectl
@@ -241,7 +241,7 @@ module "external_secrets" {
   eks_namespace = var.eks_namespace
 
   oidc_provider_arn = module.eks.oidc_provider_arn
-   providers = {
+  providers = {
     kubernetes = kubernetes
     helm       = helm
     kubectl    = kubectl

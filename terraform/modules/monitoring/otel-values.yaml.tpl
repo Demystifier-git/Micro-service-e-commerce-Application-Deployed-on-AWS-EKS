@@ -1,9 +1,10 @@
-config: |
+config:
   receivers:
     otlp:
       protocols:
-        grpc:
-        http:
+        grpc: {}
+        http: {}
+
   exporters:
     prometheus:
       endpoint: "0.0.0.0:8889"
@@ -11,6 +12,7 @@ config: |
       endpoint: "${tempo_dns}:4317"
       tls:
         insecure: true
+
   service:
     pipelines:
       metrics:
@@ -19,6 +21,7 @@ config: |
       traces:
         receivers: [otlp]
         exporters: [otlp]
+
 
 
 

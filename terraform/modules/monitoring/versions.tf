@@ -9,7 +9,7 @@ terraform {
       version = "~> 2.13"
     }
     kubectl = {
-      source  = "gavinbunney/kubectl"   # must match your root
+      source  = "gavinbunney/kubectl" # must match your root
       version = ">= 2.0.0"
     }
   }

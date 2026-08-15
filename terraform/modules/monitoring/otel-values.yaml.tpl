@@ -2,8 +2,8 @@ config:
   receivers:
     otlp:
       protocols:
-        grpc:
-        http:
+        grpc: {}
+        http: {}
 
   exporters:
     prometheus:
@@ -21,4 +21,5 @@ config:
       traces:
         receivers: [otlp]
         exporters: [otlp]
+
 

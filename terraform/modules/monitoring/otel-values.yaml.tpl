@@ -1,18 +1,16 @@
-config:
+config: |
   receivers:
     otlp:
       protocols:
-        grpc: {}
-        http: {}
-
+        grpc:
+        http:
   exporters:
     prometheus:
-      endpoint: "0.0.0.0:8889"   # Collector exposes metrics here
+      endpoint: "0.0.0.0:8889"
     otlp:
       endpoint: "${tempo_dns}:4317"
       tls:
-        insecure: true           # disable TLS if Tempo isn’t using it
-
+        insecure: true
   service:
     pipelines:
       metrics:
@@ -21,5 +19,6 @@ config:
       traces:
         receivers: [otlp]
         exporters: [otlp]
+
 
 

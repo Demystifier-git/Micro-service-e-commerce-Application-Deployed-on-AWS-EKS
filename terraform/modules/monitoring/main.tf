@@ -30,11 +30,7 @@ resource "helm_release" "otel_collector" {
     yamlencode({
       mode = "daemonset" # 
     }),
-    templatefile("${path.module}/otel-values.yaml.tpl", {
-      loki_dns       = "loki.delightdavid.online"
-      prometheus_dns = "prometheus.delightdavid.online"
-      tempo_dns      = "tempo.delightdavid.online"
-    })
+
   ]
 
   set {

@@ -12,15 +12,6 @@ resource "aws_security_group" "node_sg" {
   # - AWS VPC endpoints (ECR, S3, STS, etc.)
 
 
-  ingress {
-    from_port       = 8080
-    to_port         = 8080
-    protocol        = "tcp"
-    security_groups = [aws_security_group.lb_sg.id] # replace with your ALB SG
-    description     = "Allow ALB to reach ArgoCD pods"
-  }
-
-
   # Loki logs
   egress {
     from_port       = 3100

@@ -78,7 +78,8 @@ jobs:
         run: |
           docker build \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION \
-            .
+             -f web/Dockerfile \
+             web
 
      
       # Push Image

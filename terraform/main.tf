@@ -396,7 +396,7 @@ module "external_dns" {
   providers = {
     kubernetes = kubernetes
     helm       = helm
-    kubectl    = kubectl
+   
   }
 }
 

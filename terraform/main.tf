@@ -140,6 +140,7 @@ module "node_group" {
   node_role_arn = module.iam.node_role_arn
 
   node_security_group_id = aws_security_group.node_sg.id
+  
 }
 
 module "irsa" {
@@ -382,3 +383,21 @@ module "vpc_endpoints" {
   node_sg_id             = aws_security_group.node_sg.id
   web_sg_id              = module.web_sg.security_group_id
 }
+
+
+
+
+module "external_dns" {
+  source                = "./modules/external-dns"
+  cluster_name          = var.cluster_name
+  external_dns_role_arn = module.irsa.external_dns_role_arn  # <-- use your IRSA module output
+  domain_filters        = [var.domain_name]                  # e.g. delightdavid.online
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+    kubectl    = kubectl
+  }
+}
+
+

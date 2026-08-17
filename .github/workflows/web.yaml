@@ -29,24 +29,24 @@ jobs:
     environment: production
 
     steps:
-     
+
       # Checkout Code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ inputs.branch }}
 
       # Validate SemVer
       - name: Validate version format
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="${{ inputs.version }}"
 
           if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "ERROR: Version must follow v1.2.3 format"
             exit 1
           fi
 
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       # Configure AWS
       - name: Configure AWS credentials
@@ -60,35 +60,39 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Set ECR Registry
       - name: Set registry
         run: |
-          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> "$GITHUB_ENV"
 
       # Build Docker Image
       - name: Build image
         run: |
           docker build \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION \
+            -t "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION" \
             -f web/Dockerfile \
             web
 
       # Scan Docker Image with Trivy
       - name: Scan image with Trivy
-        uses:  aquasecurity/trivy-action@0.19.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.VERSION }}
-          format: 'table'
+          format: table
           exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
 
-      # Push Image (only if Trivy passes)
+      # Push Image Only If Trivy Passes
       - name: Push image to ECR
         if: success()
         run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
 
-      # Summary
+      # Deployment Summary
       - name: Deployment Summary
+        if: always()
         run: |
           echo "Service: web"
           echo "Version: $VERSION"

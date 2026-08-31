@@ -14,8 +14,6 @@ env:
 
 jobs:
 
-  
-
   ################################################################################
   # TERRAFORM PLAN
   ################################################################################
@@ -25,14 +23,17 @@ jobs:
     runs-on: [self-hosted, ubuntu]
     environment:
       name: production
+
     defaults:
       run:
         working-directory: terraform
+
     env:
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_db_name: ${{ secrets.DB_NAME }}
       TF_VAR_secret_values: ${{ secrets.SECRET_VALUES }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -83,15 +84,18 @@ jobs:
     needs: plan
     runs-on: [self-hosted, ubuntu]
     environment:
-      name: production   # approval required here
+      name: production
+
     defaults:
       run:
         working-directory: terraform
+
     env:
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_db_name: ${{ secrets.DB_NAME }}
       TF_VAR_secret_values: ${{ secrets.SECRET_VALUES }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -127,4 +131,6 @@ jobs:
         with:
           name: deployment-logs
           path: terraform/*.log
+
+
 

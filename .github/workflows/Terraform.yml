@@ -19,7 +19,7 @@ jobs:
   ################################################################################
   plan:
     name: Terraform Plan
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     environment:
       name: production
 
@@ -81,7 +81,7 @@ jobs:
   apply:
     name: Terraform Apply
     needs: plan
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     environment:
       name: production
 

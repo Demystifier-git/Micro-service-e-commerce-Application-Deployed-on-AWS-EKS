@@ -59,7 +59,7 @@ domain_name = "delightdavid.online"
 grafana_hostname    = "grafana.delightdavid.online"
 prometheus_hostname = "prometheus.delightdavid.online"
 
-certificate_arn = "arn:aws:acm:us-east-1:387041334219:certificate/e2dc15a3-8532-4239-b58e-60aa7caab0f5"
+certificate_arn = "arn:aws:acm:us-east-1:245361884126:certificate/0b18d99a-575e-4038-a99c-dd49419d3df0"
 account_id      = "387041334219"
 project_name    = "robot-shop"
 

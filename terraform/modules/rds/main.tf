@@ -16,7 +16,7 @@ resource "aws_db_instance" "this" {
 
   storage_encrypted       = true
   kms_key_id              = var.kms_key_arn
-  backup_retention_period = 7
+  backup_retention_period = 0
   deletion_protection     = true
 
   vpc_security_group_ids                = var.security_group_ids

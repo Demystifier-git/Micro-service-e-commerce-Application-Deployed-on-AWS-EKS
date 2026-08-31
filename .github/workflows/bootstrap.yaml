@@ -37,6 +37,4 @@ jobs:
 
       - name: Terraform Apply
         working-directory: bootstrap
-        run: terraform apply -auto-approve \
-          -var="env=${{ github.event.inputs.environment }}" \
-          -var="account_id=${{ secrets.AWS_ACCOUNT_ID }}"
+        run: terraform apply -auto-approve -var="env=${{ github.event.inputs.environment }}" -var="account_id=${{ secrets.AWS_ACCOUNT_ID }}"

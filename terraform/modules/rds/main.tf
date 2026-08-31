@@ -19,9 +19,9 @@ resource "aws_db_instance" "this" {
   backup_retention_period = 0
   deletion_protection     = true
 
-  vpc_security_group_ids                = var.security_group_ids
-  db_subnet_group_name                  = aws_db_subnet_group.this.name
-  
+  vpc_security_group_ids = var.security_group_ids
+  db_subnet_group_name   = aws_db_subnet_group.this.name
+
 
   skip_final_snapshot = true
   publicly_accessible = false

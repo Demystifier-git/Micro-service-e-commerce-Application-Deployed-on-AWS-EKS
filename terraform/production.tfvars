@@ -19,7 +19,7 @@ db_engine_version    = "8.0"
 db_instance_class    = "db.t3.micro"
 db_allocated_storage = 20
 
-bucket_name = "demystifier-bucket-387041334219"
+bucket_name = "goldstandard-bucket-38704133421990202653"
 
 
 dynamodb_table_name   = "terraform-demo-table"

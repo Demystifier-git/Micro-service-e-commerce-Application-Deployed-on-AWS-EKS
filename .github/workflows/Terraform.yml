@@ -14,22 +14,7 @@ env:
 
 jobs:
 
-  ################################################################################
-  # TEST RUNNER CONNECTIVITY
-  ################################################################################
-  test-runner:
-    name: Test Runner Connectivity
-    runs-on: [self-hosted, ubuntu]
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Print Runner Info
-        run: |
-          echo "✅ Hello from self-hosted runner!"
-          echo "Hostname: $(hostname)"
-          echo "Date: $(date)"
-          echo "Working directory: $(pwd)"
+  
 
   ################################################################################
   # TERRAFORM PLAN

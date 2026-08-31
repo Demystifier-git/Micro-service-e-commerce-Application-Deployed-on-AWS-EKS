@@ -65,7 +65,7 @@ project_name    = "robot-shop"
 
 ec2_name = "self-hosted-runner/monitoring-server"
 
-hosted_zone_id = "Z0085504O5UWBH6JJCBD"
+hosted_zone_id = "Z03671882FOPUGI39PA4D"
 ec2_ami        = "ami-0b6c6ebed2801a5cb"
 instance_type  = "m7i-flex.large"
 

@@ -19,7 +19,6 @@ jobs:
   ################################################################################
   plan:
     name: Terraform Plan
-    needs: test-runner
     runs-on: [self-hosted, ubuntu]
     environment:
       name: production
@@ -131,6 +130,7 @@ jobs:
         with:
           name: deployment-logs
           path: terraform/*.log
+
 
 
 

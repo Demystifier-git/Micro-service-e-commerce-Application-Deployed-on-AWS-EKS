@@ -205,10 +205,12 @@ module "argocd" {
 
 locals {
   secrets = {
-    mongodb  = ["db", ]
-    rabbitmq = ["db", ]
-    redis    = ["db", ]
-    mysql    = ["db", ]
+    mongodb        = ["db", ]
+    rabbitmq       = ["db", ]
+    redis          = ["db", ]
+    mysql          = ["db", ]
+    grafana        = []
+    mysql_exporter = []
 
   }
 }

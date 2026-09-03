@@ -90,7 +90,7 @@ services:
     container_name: mysql-exporter
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: "${MYSQL_EXPORTER_USER}:${MYSQL_EXPORTER_PASSWORD}@(mydb.xxxxxxx.us-east-1.rds.amazonaws.com:3306)/"
+      DATA_SOURCE_NAME: "${MYSQL_EXPORTER_USER}:${MYSQL_EXPORTER_PASSWORD}@mysql-db.ckxym2w48okb.us-east-1.rds.amazonaws.com/"
       MYSQLD_EXPORTER_USER: ${MYSQL_EXPORTER_USER}
       MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD}
       MYSQLD_EXPORTER_LOG_LEVEL: info

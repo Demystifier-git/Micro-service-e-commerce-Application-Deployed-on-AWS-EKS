@@ -18,6 +18,13 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm_attach" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+# Attach RDS read-only access to EC2 role
+resource "aws_iam_role_policy_attachment" "ec2_rds_readonly_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
+}
+
+
 #  Create IAM Instance Profile
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2-instance-profile"

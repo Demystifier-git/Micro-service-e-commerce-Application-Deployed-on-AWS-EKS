@@ -209,8 +209,8 @@ locals {
     rabbitmq       = ["db", ]
     redis          = ["db", ]
     mysql          = ["db", ]
-    grafana        = []
-    mysql_exporter = []
+    grafana        = ["default"]
+    mysql_exporter = ["default"]
 
   }
 }

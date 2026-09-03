@@ -1,4 +1,4 @@
-name: Deploy Monitoring Folder via SSM
+name: Update Monitoring Folder via SSM
 
 on:
   push:
@@ -21,11 +21,12 @@ jobs:
           role-to-assume: ${{ secrets.TERRAFORM_AWS_ROLE_ARN }}
           aws-region: us-east-1   # change to your region
 
-      - name: Deploy monitoring folder via SSM
+      - name: Update monitoring folder on EC2
         run: |
           aws ssm send-command \
             --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --comment "Clone only monitoring folder" \
-            --parameters 'commands=["mkdir -p /home/ec2-user/repo && cd /home/ec2-user/repo && if [ ! -d .git ]; then git init && git remote add origin <your-repo-url> && git config core.sparseCheckout true && echo monitoring/* > .git/info/sparse-checkout; fi && git pull origin main"]'
+            --comment "Update monitoring folder" \
+            --parameters 'commands=["cd /root/monitoring && git pull origin main"]'
+
 

@@ -2,11 +2,9 @@ name: Deploy Monitoring Folder via SSM
 
 on:
   push:
-    paths:
-      - 'monitoring/**'   # only trigger when monitoring folder changes
     branches:
-      - main
-
+      - main   # trigger on every push to main
+      
 jobs:
   deploy:
     runs-on: ubuntu-latest

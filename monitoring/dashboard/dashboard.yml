@@ -1,0 +1,62 @@
+apiVersion: 1
+
+providers:
+  - name: 'Applications Dashboards'
+    orgId: 1
+    folder: 'Applications'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/monitoring_dashboards/applications
+
+  - name: 'Kubernetes Dashboards'
+    orgId: 1
+    folder: 'Kubernetes'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/monitoring_dashboards/kubernetes
+
+  - name: 'Logs Dashboards'
+    orgId: 1
+    folder: 'Logs'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/monitoring_dashboards/logs
+
+  - name: 'RDS Dashboards'
+    orgId: 1
+    folder: 'RDS'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/monitoring_dashboards/rds
+
+  - name: 'System Dashboards'
+    orgId: 1
+    folder: 'System'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/monitoring_dashboards/system
+
+  - name: 'Traces Dashboards'
+    orgId: 1
+    folder: 'Traces'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/monitoring_dashboards/traces

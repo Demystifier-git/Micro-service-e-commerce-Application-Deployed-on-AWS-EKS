@@ -1,0 +1,367 @@
+{
+  "__inputs": [],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "CPU Utilization",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "CPUUtilization",
+          "statistics": [
+            "Average"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Database Connections",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "DatabaseConnections",
+          "statistics": [
+            "Average"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Free Storage Space",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "FreeStorageSpace",
+          "statistics": [
+            "Minimum"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Freeable Memory",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "FreeableMemory",
+          "statistics": [
+            "Minimum"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Read IOPS",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "iops"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "ReadIOPS",
+          "statistics": [
+            "Average"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Write IOPS",
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "iops"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "WriteIOPS",
+          "statistics": [
+            "Average"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Read Latency",
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "ReadLatency",
+          "statistics": [
+            "Average"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Write Latency",
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "CloudWatch"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "CloudWatch"
+          },
+          "namespace": "AWS/RDS",
+          "metricName": "WriteLatency",
+          "statistics": [
+            "Average"
+          ],
+          "dimensions": {},
+          "period": "300",
+          "region": "us-east-1",
+          "alias": "{{DBInstanceIdentifier}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "rds",
+    "database",
+    "aws"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "RDS Overview",
+  "uid": "rds-overview",
+  "version": 1
+}

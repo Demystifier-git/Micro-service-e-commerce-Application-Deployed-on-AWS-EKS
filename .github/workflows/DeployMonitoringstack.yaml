@@ -1,4 +1,4 @@
-name: Deploy Monitoring Repo via SSM
+name: Deploy Monitoring Folder via SSM
 
 on:
   push:
@@ -10,8 +10,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: production
     permissions:
       id-token: write   # required for OIDC
       contents: read
@@ -20,13 +18,14 @@ jobs:
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.TERRAFORM_AWS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GitHubOIDCRole>
           aws-region: us-east-1   # change to your region
 
-      - name: Update monitoring folder on EC2
+      - name: Deploy monitoring folder via SSM
         run: |
           aws ssm send-command \
             --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --comment "Update monitoring folder" \
-            --parameters 'commands=["cd /home/ec2-user/repo && git pull origin main"]'
+            --comment "Clone only monitoring folder" \
+            --parameters 'commands=["mkdir -p /home/ec2-user/repo && cd /home/ec2-user/repo && if [ ! -d .git ]; then git init && git remote add origin <your-repo-url> && git config core.sparseCheckout true && echo monitoring/* > .git/info/sparse-checkout; fi && git pull origin main"]'
+

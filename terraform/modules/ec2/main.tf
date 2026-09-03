@@ -24,6 +24,12 @@ resource "aws_iam_role_policy_attachment" "ec2_rds_readonly_attach" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
 }
 
+# Attach Secrets Manager read-only access to EC2 role
+resource "aws_iam_role_policy_attachment" "ec2_secretsmanager_readonly_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadOnly"
+}
+
 
 #  Create IAM Instance Profile
 resource "aws_iam_instance_profile" "ec2_profile" {

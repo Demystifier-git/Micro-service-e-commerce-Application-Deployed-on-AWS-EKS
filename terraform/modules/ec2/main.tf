@@ -87,6 +87,43 @@ resource "aws_iam_role_policy_attachment" "ec2_secretsmanager_specific_attach" {
 }
 
 # ============================================================
+# S3 BUCKET ACCESS POLICY
+# ============================================================
+
+resource "aws_iam_policy" "ec2_s3_access" {
+  name        = "ec2-s3-access"
+  description = "Allow EC2 to read/write to goldstandard bucket"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::goldstandard-bucket-38704133421990202653-logs",  # bucket itself
+          "arn:aws:s3:::goldstandard-bucket-38704133421990202653-logs/*" # objects inside bucket
+        ]
+      }
+    ]
+  })
+}
+
+# ============================================================
+# ATTACH S3 POLICY TO EC2 ROLE
+# ============================================================
+
+resource "aws_iam_role_policy_attachment" "ec2_s3_access_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.ec2_s3_access.arn
+}
+
+# ============================================================
 # EC2 INSTANCE PROFILE
 # ============================================================
 

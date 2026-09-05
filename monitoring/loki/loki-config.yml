@@ -31,9 +31,10 @@ storage_config:
   boltdb_shipper:
     active_index_directory: /loki/index
     cache_location: /loki/cache
-    shared_store: filesystem
-  filesystem:
-    directory: /loki/chunks
+    shared_store: s3
+  aws:
+    bucketnames: goldstandard-bucket-38704133421990202653-logs        # replace with your bucket name
+    region: us-east-1 
 
 limits_config:
   enforce_metric_name: false

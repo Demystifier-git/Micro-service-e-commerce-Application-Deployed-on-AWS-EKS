@@ -12,6 +12,14 @@ resource "aws_security_group" "web" {
   }
 
   ingress {
+    description     = "grafana from lb"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [var.lb_security_group_id]
+  }
+
+  ingress {
     description = "Loki from EKS private subnets"
     from_port   = 3100
     to_port     = 3100

@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main   # trigger on every push to main
+    paths:
+      - 'monitoring/**'   
 
 jobs:
   deploy:

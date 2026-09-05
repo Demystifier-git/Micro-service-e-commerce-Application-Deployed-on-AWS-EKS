@@ -1,0 +1,29 @@
+server:
+  http_listen_port: 3200   # Grafana queries Tempo here
+  grpc_listen_port: 9095   # Internal gRPC
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+        http:
+    jaeger:
+      protocols:
+        thrift_http:
+    zipkin:
+
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1_000_000
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: 1h
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/traces

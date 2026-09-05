@@ -15,24 +15,38 @@ env:
 jobs:
 
   ################################################################################
+  # TEST RUNNER CONNECTIVITY
+  ################################################################################
+  test-runner:
+    name: Test Runner Connectivity
+    runs-on: [self-hosted, ubuntu]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Print Runner Info
+        run: |
+          echo "✅ Hello from self-hosted runner!"
+          echo "Hostname: $(hostname)"
+          echo "Date: $(date)"
+          echo "Working directory: $(pwd)"
+  ################################################################################
   # TERRAFORM PLAN
   ################################################################################
   plan:
     name: Terraform Plan
-    runs-on: ubuntu-latest
+    needs: test-runner
+    runs-on: [self-hosted, ubuntu]
     environment:
       name: production
-
     defaults:
       run:
         working-directory: terraform
-
     env:
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_db_name: ${{ secrets.DB_NAME }}
       TF_VAR_secret_values: ${{ secrets.SECRET_VALUES }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -50,17 +64,14 @@ jobs:
         run: |
           set -o pipefail
           terraform fmt -check -recursive | tee fmt.log
-
       - name: Terraform Init
         run: |
           set -o pipefail
           terraform init -reconfigure | tee init.log
-
       - name: Terraform Validate
         run: |
           set -o pipefail
           terraform validate | tee validate.log
-
       - name: Terraform Plan
         run: |
           set -o pipefail
@@ -68,7 +79,6 @@ jobs:
             -input=false \
             -var-file=production.tfvars \
             -out=tfplan | tee plan.log
-
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
         with:
@@ -81,20 +91,17 @@ jobs:
   apply:
     name: Terraform Apply
     needs: plan
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ubuntu]
     environment:
-      name: production
-
+      name: production   # approval required here
     defaults:
       run:
         working-directory: terraform
-
     env:
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_db_name: ${{ secrets.DB_NAME }}
       TF_VAR_secret_values: ${{ secrets.SECRET_VALUES }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -112,7 +119,6 @@ jobs:
         run: |
           set -o pipefail
           terraform init -reconfigure | tee init.log
-
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
         with:
@@ -123,14 +129,12 @@ jobs:
         run: |
           set -o pipefail
           terraform apply -input=false tfplan | tee apply.log
-
       - name: Upload Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: deployment-logs
           path: terraform/*.log
-
 
 
 

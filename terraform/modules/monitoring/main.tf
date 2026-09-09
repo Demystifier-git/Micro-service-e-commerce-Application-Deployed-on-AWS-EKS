@@ -12,14 +12,13 @@ resource "helm_release" "promtail" {
       config = {
         clients = [{
           # Use DNS name instead of IP
-          url = "http://loki.delightdavid.online:3100/loki/api/v1/push"
+          url = "http://loki:3100/loki/api/v1/push"
         }]
       }
     })
   ]
 }
 
-# OpenTelemetry Collector via Helm
 resource "helm_release" "otel_collector" {
   name       = "otel-collector"
   repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
@@ -27,10 +26,7 @@ resource "helm_release" "otel_collector" {
   namespace  = var.namespace
 
   values = [
-    yamlencode({
-      mode = "daemonset" # 
-    }),
-
+    file("${path.module}/otel-values.yaml.tpl")
   ]
 
   set {
@@ -45,5 +41,34 @@ resource "helm_release" "otel_collector" {
 
   depends_on = [
     helm_release.promtail
+  ]
+}
+
+# Node Exporter via Helm
+resource "helm_release" "node_exporter" {
+  name             = "node-exporter"
+  repository       = "https://prometheus-community.github.io/helm-charts"
+  chart            = "prometheus-node-exporter"
+  namespace        = var.namespace
+  create_namespace = true
+
+  values = [
+    yamlencode({
+      hostNetwork = true   # bind directly to node's private IP
+      hostPID     = true   # recommended for node exporter
+      service = {
+        type = "ClusterIP" # internal service, not exposed publicly
+      }
+      prometheus = {
+        monitor = {
+          enabled = false  # disable ServiceMonitor since Prometheus is external
+        }
+      }
+    })
+  ]
+
+  depends_on = [
+    helm_release.promtail,
+    helm_release.otel_collector
   ]
 }

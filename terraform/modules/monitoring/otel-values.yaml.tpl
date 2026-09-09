@@ -6,16 +6,22 @@ config:
         http: {}
 
   exporters:
-    debug: {}   # just logs traces/metrics locally
+    debug: {}
+    otlp/tempo:
+      endpoint: "tempo:4317"
+      tls:
+        insecure: true
+    prometheus:
+      endpoint: "0.0.0.0:8889"
 
   service:
     pipelines:
       metrics:
         receivers: [otlp]
-        exporters: [debug]
+        exporters: [prometheus]
       traces:
         receivers: [otlp]
-        exporters: [debug]
+        exporters: [otlp/tempo]
 
 
 

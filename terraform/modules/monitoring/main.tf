@@ -34,6 +34,11 @@ resource "helm_release" "otel_collector" {
     value = "otel/opentelemetry-collector"
   }
 
+   set {
+    name  = "mode"
+    value = "deployment"
+  }
+
   set {
     name  = "image.tag"
     value = "0.102.0"

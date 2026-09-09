@@ -54,14 +54,14 @@ resource "helm_release" "node_exporter" {
 
   values = [
     yamlencode({
-      hostNetwork = true   # bind directly to node's private IP
-      hostPID     = true   # recommended for node exporter
+      hostNetwork = true # bind directly to node's private IP
+      hostPID     = true # recommended for node exporter
       service = {
         type = "ClusterIP" # internal service, not exposed publicly
       }
       prometheus = {
         monitor = {
-          enabled = false  # disable ServiceMonitor since Prometheus is external
+          enabled = false # disable ServiceMonitor since Prometheus is external
         }
       }
     })

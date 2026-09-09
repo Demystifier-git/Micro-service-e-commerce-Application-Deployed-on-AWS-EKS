@@ -34,7 +34,7 @@ resource "helm_release" "otel_collector" {
     value = "otel/opentelemetry-collector"
   }
 
-   set {
+  set {
     name  = "mode"
     value = "deployment"
   }

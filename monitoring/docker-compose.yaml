@@ -52,7 +52,6 @@ services:
       - "-config.file=/etc/loki/loki-config.yml"
     volumes:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
-      - loki_data:/loki
       - ./loki/index:/loki/index
       - ./loki/cache:/loki/cache
     # internal only, no ports exposed

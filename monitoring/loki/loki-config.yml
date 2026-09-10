@@ -1,7 +1,8 @@
 auth_enabled: false
 
 server:
-  http_listen_port: 3100   # Promtail will push logs here
+  http_listen_port: 3100
+  grpc_listen_port: 9095
 
 ingester:
   lifecycler:
@@ -21,7 +22,7 @@ schema_config:
   configs:
     - from: 2020-10-24
       store: boltdb-shipper
-      object_store: filesystem
+      object_store: s3
       schema: v11
       index:
         prefix: index_
@@ -33,8 +34,12 @@ storage_config:
     cache_location: /loki/cache
     shared_store: s3
   aws:
-    bucketnames: goldstandard-bucket-38704133421990202653-logs        # replace with your bucket name
-    region: us-east-1 
+    bucketnames: goldstandard-bucket-38704133421990202653-logs
+    region: us-east-1
+
+compactor:
+  working_directory: /loki/compactor
+  shared_store: s3
 
 limits_config:
   enforce_metric_name: false

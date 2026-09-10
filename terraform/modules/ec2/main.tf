@@ -124,6 +124,18 @@ resource "aws_iam_role_policy_attachment" "ec2_s3_access_attach" {
 }
 
 # ============================================================
+# EKS ACCESS
+# ============================================================
+
+resource "aws_iam_role_policy_attachment" "ec2_eks_cluster_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+
+
+
+# ============================================================
 # EC2 INSTANCE PROFILE
 # ============================================================
 

@@ -126,6 +126,14 @@ module "eks" {
   private_subnets = module.subnets.private_subnet_ids
   kms_key_arn     = module.kms.kms_key_arn
   tags            = var.tags
+
+    map_roles = [
+    {
+      rolearn  = "arn:aws:iam::245361884126:role/ec2-role"
+      username = "ec2-role"
+      groups   = ["eks-readers"]
+    }
+  ]
 }
 
 module "node_group" {

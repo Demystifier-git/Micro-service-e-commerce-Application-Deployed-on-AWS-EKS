@@ -8,7 +8,7 @@ config:
   exporters:
     debug: {}
     otlp/tempo:
-      endpoint: "tempo:4317"
+      endpoint: "10.0.2.226:4317"
       tls:
         insecure: true
     prometheus:

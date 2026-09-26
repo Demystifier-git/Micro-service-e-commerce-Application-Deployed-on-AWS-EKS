@@ -10,7 +10,7 @@ permissions:
 jobs:
   bootstrap-client-vpn:
     name: Bootstrap Client VPN
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [self-hosted, linux]
     environment: production
 
     env:

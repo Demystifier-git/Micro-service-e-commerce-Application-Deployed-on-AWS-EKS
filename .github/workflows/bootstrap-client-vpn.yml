@@ -1,0 +1,326 @@
+name: Bootstrap AWS Client VPN Certificates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  bootstrap-client-vpn:
+    name: Bootstrap Client VPN
+    runs-on: [self-hosted, ubuntu]
+    environment: production
+
+    env:
+      AWS_REGION: us-east-1
+      WORK_DIR: /tmp/client-vpn-bootstrap
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify runner
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Runner: $(hostname)"
+          echo "User: $(whoami)"
+          echo "AWS CLI: $(aws --version)"
+          echo "OpenSSL: $(openssl version)"
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TERRAFORM_AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: ClientVPNBootstrap
+
+      - name: Verify AWS identity
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          aws sts get-caller-identity
+
+      - name: Prepare secure workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf "$WORK_DIR"
+          mkdir -p "$WORK_DIR"
+          chmod 700 "$WORK_DIR"
+
+      - name: Generate Certificate Authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+
+          openssl genrsa -out ca.key 2048
+          chmod 600 ca.key
+
+          openssl req \
+            -x509 \
+            -new \
+            -sha256 \
+            -days 3650 \
+            -key ca.key \
+            -out ca.crt \
+            -subj "/C=NG/ST=Lagos/L=Lagos/O=DelightDevOps/OU=Infrastructure/CN=Delight-ClientVPN-CA" \
+            -addext "basicConstraints=critical,CA:TRUE,pathlen:1" \
+            -addext "keyUsage=critical,keyCertSign,cRLSign" \
+            -addext "subjectKeyIdentifier=hash"
+
+          chmod 644 ca.crt
+
+      - name: Generate VPN server certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+
+          openssl genrsa -out server.key 2048
+          chmod 600 server.key
+
+          openssl req \
+            -new \
+            -sha256 \
+            -key server.key \
+            -out server.csr \
+            -subj "/C=NG/ST=Lagos/L=Lagos/O=DelightDevOps/OU=Infrastructure/CN=server"
+
+          cat > server.ext <<'EOF'
+          basicConstraints=critical,CA:FALSE
+          keyUsage=critical,digitalSignature,keyEncipherment
+          extendedKeyUsage=serverAuth
+          subjectAltName=DNS:server
+          subjectKeyIdentifier=hash
+          authorityKeyIdentifier=keyid,issuer
+          EOF
+
+          openssl x509 \
+            -req \
+            -sha256 \
+            -days 825 \
+            -in server.csr \
+            -CA ca.crt \
+            -CAkey ca.key \
+            -CAcreateserial \
+            -out server.crt \
+            -extfile server.ext
+
+          chmod 644 server.crt
+
+      - name: Generate VPN client certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+
+          openssl genrsa -out client.key 2048
+          chmod 600 client.key
+
+          openssl req \
+            -new \
+            -sha256 \
+            -key client.key \
+            -out client.csr \
+            -subj "/C=NG/ST=Lagos/L=Lagos/O=DelightDevOps/OU=VPN/CN=delight-admin"
+
+          cat > client.ext <<'EOF'
+          basicConstraints=critical,CA:FALSE
+          keyUsage=critical,digitalSignature,keyEncipherment
+          extendedKeyUsage=clientAuth
+          subjectKeyIdentifier=hash
+          authorityKeyIdentifier=keyid,issuer
+          EOF
+
+          openssl x509 \
+            -req \
+            -sha256 \
+            -days 825 \
+            -in client.csr \
+            -CA ca.crt \
+            -CAkey ca.key \
+            -CAcreateserial \
+            -out client.crt \
+            -extfile client.ext
+
+          chmod 644 client.crt
+
+      - name: Verify certificates
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+
+          openssl verify \
+            -CAfile ca.crt \
+            server.crt
+
+          openssl verify \
+            -CAfile ca.crt \
+            client.crt
+
+          echo "Server certificate:"
+          openssl x509 \
+            -in server.crt \
+            -noout \
+            -subject \
+            -issuer \
+            -dates
+
+          echo "Client certificate:"
+          openssl x509 \
+            -in client.crt \
+            -noout \
+            -subject \
+            -issuer \
+            -dates
+
+      - name: Import server certificate into ACM
+        id: import_server_certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+
+          ARN="$(
+            aws acm import-certificate \
+              --region "$AWS_REGION" \
+              --certificate fileb://server.crt \
+              --private-key fileb://server.key \
+              --certificate-chain fileb://ca.crt \
+              --query 'CertificateArn' \
+              --output text
+          )"
+
+          if [[ -z "$ARN" || "$ARN" == "None" ]]; then
+            echo "Failed to import server certificate."
+            exit 1
+          fi
+
+          echo "Server certificate imported."
+
+          {
+            echo "SERVER_CERTIFICATE_ARN=$ARN"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Tag ACM certificate
+        shell: bash
+        env:
+          SERVER_CERTIFICATE_ARN: ${{ steps.import_server_certificate.outputs.SERVER_CERTIFICATE_ARN }}
+        run: |
+          set -euo pipefail
+
+          aws acm add-tags-to-certificate \
+            --region "$AWS_REGION" \
+            --certificate-arn "$SERVER_CERTIFICATE_ARN" \
+            --tags \
+              Key=Name,Value=production-client-vpn-server \
+              Key=Project,Value=eks-platform \
+              Key=ManagedBy,Value=github-actions \
+              Key=Purpose,Value=client-vpn
+
+      - name: Export Client VPN configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+
+          echo "The Client VPN endpoint does not exist yet."
+          echo "The .ovpn configuration will be exported after Terraform creates the endpoint."
+
+      - name: Create client bundle directory
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf "$WORK_DIR/client-bundle"
+          mkdir -p "$WORK_DIR/client-bundle"
+          chmod 700 "$WORK_DIR/client-bundle"
+
+          cp "$WORK_DIR/ca.crt" \
+             "$WORK_DIR/client-bundle/"
+
+          cp "$WORK_DIR/client.crt" \
+             "$WORK_DIR/client-bundle/"
+
+          cp "$WORK_DIR/client.key" \
+             "$WORK_DIR/client-bundle/"
+
+          chmod 600 "$WORK_DIR/client-bundle/client.key"
+
+      - name: Encrypt client bundle
+        shell: bash
+        env:
+          VPN_BUNDLE_PASSWORD: ${{ secrets.VPN_BUNDLE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+
+          tar -czf client-vpn-client-files.tar.gz \
+            -C client-bundle \
+            ca.crt \
+            client.crt \
+            client.key
+
+          openssl enc \
+            -aes-256-cbc \
+            -pbkdf2 \
+            -iter 200000 \
+            -salt \
+            -in client-vpn-client-files.tar.gz \
+            -out production-client-vpn.enc \
+            -pass env:VPN_BUNDLE_PASSWORD
+
+          chmod 600 production-client-vpn.enc
+
+          rm -f client-vpn-client-files.tar.gz
+
+      - name: Upload encrypted client bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-client-vpn
+          path: /tmp/client-vpn-bootstrap/production-client-vpn.enc
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Write certificate ARN
+        shell: bash
+        env:
+          SERVER_CERTIFICATE_ARN: ${{ steps.import_server_certificate.outputs.SERVER_CERTIFICATE_ARN }}
+        run: |
+          set -euo pipefail
+
+          echo "=================================================="
+          echo "Client VPN certificate bootstrap completed"
+          echo "=================================================="
+          echo
+          echo "SERVER_CERTIFICATE_ARN:"
+          echo "$SERVER_CERTIFICATE_ARN"
+          echo
+          echo "Save this ARN as a GitHub Environment variable:"
+          echo "CLIENT_VPN_SERVER_CERTIFICATE_ARN"
+          echo
+          echo "The client private key was encrypted before upload."
+          echo "The artifact expires after 1 day."
+          echo "=================================================="
+
+      - name: Secure cleanup
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -d "$WORK_DIR" ]]; then
+            find "$WORK_DIR" \
+              -type f \
+              -exec shred -u -z {} \; 2>/dev/null || true
+
+            rm -rf "$WORK_DIR"
+          fi

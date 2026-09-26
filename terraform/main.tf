@@ -404,4 +404,31 @@ module "external_dns" {
   }
 }
 
+module "client_vpn" {
+  source = "./modules/client-vpn"
+
+  name = "production-admin-vpn"
+
+  vpc_id = module.vpc.vpc_id
+
+  private_subnet_ids = [
+    module.vpc.private_subnet_ids[0],
+    module.vpc.private_subnet_ids[1]
+  ]
+
+  vpc_cidr_block = var.vpc_cidr_block
+
+  client_cidr_block = var.client_vpn_client_cidr
+
+  server_certificate_arn = var.client_vpn_server_certificate_arn
+
+  client_vpn_ca_certificate_path = var.client_vpn_ca_certificate_path
+
+  tags = {
+    Environment = "production"
+    ManagedBy   = "Terraform"
+    Project     = "EKS"
+    Purpose     = "Private administrative access"
+  }
+}
 

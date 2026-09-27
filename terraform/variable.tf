@@ -185,32 +185,26 @@ variable "hosted_zone_id" {
 }
 
 variable "client_vpn_client_cidr" {
-  description = "CIDR block assigned to AWS Client VPN clients"
+  description = "CIDR range assigned to AWS Client VPN clients"
   type        = string
 
-  validation {
-    condition = (
-      can(cidrhost(var.client_vpn_client_cidr, 0)) &&
-      tonumber(split("/", var.client_vpn_client_cidr)[1]) <= 22
-    )
+  default = "10.250.0.0/22"
 
-    error_message = "client_vpn_client_cidr must be a valid IPv4 CIDR with a /22 or larger network."
+  validation {
+    condition     = can(cidrhost(var.client_vpn_client_cidr, 0))
+    error_message = "client_vpn_client_cidr must be a valid IPv4 CIDR block."
   }
 }
 
 variable "client_vpn_server_certificate_arn" {
-  description = "ACM certificate ARN used as the AWS Client VPN server certificate"
+  description = "ACM ARN of the Client VPN server certificate"
   type        = string
+
+  validation {
+    condition     = can(regex("^arn:aws:acm:[^:]+:[0-9]{12}:certificate/.+$", var.client_vpn_server_certificate_arn))
+    error_message = "client_vpn_server_certificate_arn must be a valid ACM certificate ARN."
+  }
 }
-
-variable "client_vpn_ca_certificate_path" {
-  description = "Local path to the Client VPN root CA certificate"
-  type        = string
-}
-
-
-
-
 
 
 

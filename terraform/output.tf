@@ -90,6 +90,25 @@ output "vpc_endpoint_ids" {
   value = module.vpc_endpoints.endpoint_ids
 }
 
+output "client_vpn_endpoint_id" {
+  description = "AWS Client VPN endpoint ID"
+  value       = module.client_vpn.client_vpn_endpoint_id
+}
+
+output "client_vpn_dns_name" {
+  description = "AWS Client VPN DNS name"
+  value       = module.client_vpn.client_vpn_dns_name
+}
+
+output "client_vpn_security_group_id" {
+  description = "Client VPN security group ID"
+  value       = module.client_vpn.client_vpn_security_group_id
+}
+
+output "client_vpn_client_cidr" {
+  description = "Client VPN client CIDR"
+  value       = module.client_vpn.client_vpn_client_cidr
+}
 
 
 

@@ -409,26 +409,20 @@ module "client_vpn" {
 
   name = "production-admin-vpn"
 
-  vpc_id = module.vpc.vpc_id
+  vpc_id         = module.vpc.vpc_id
+  vpc_cidr_block = var.vpc_cidr
 
-  private_subnet_ids = [
-    module.vpc.private_subnet_ids[0],
-    module.vpc.private_subnet_ids[1]
-  ]
-
-  vpc_cidr_block = var.vpc_cidr_block
+  private_subnet_ids = module.subnets.private_subnet_ids
 
   client_cidr_block = var.client_vpn_client_cidr
 
   server_certificate_arn = var.client_vpn_server_certificate_arn
 
-  client_vpn_ca_certificate_path = var.client_vpn_ca_certificate_path
-
   tags = {
     Environment = "production"
-    ManagedBy   = "Terraform"
-    Project     = "EKS"
-    Purpose     = "Private administrative access"
+    Project     = "eks-platform"
+    ManagedBy   = "terraform"
+    Purpose     = "private-admin-access"
   }
 }
 

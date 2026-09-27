@@ -69,3 +69,4 @@ hosted_zone_id = "Z03671882FOPUGI39PA4D"
 ec2_ami        = "ami-0b6c6ebed2801a5cb"
 instance_type  = "m7i-flex.large"
 
+client_vpn_server_certificate_arn = "arn:aws:acm:us-east-1:245361884126:certificate/2ce2c2c7-780e-4169-985d-a25397d338eb"

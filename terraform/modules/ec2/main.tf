@@ -123,35 +123,6 @@ resource "aws_iam_role_policy_attachment" "ec2_s3_access_attach" {
   policy_arn = aws_iam_policy.ec2_s3_access.arn
 }
 
-# ============================================================
-# EKS READ ACCESS FOR MONITORING EC2
-# ============================================================
-
-resource "aws_iam_policy" "ec2_eks_readonly" {
-  name        = "ec2-eks-monitoring-readonly"
-  description = "Allow monitoring EC2 to discover and monitor the production EKS cluster"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-
-    Statement = [
-      {
-        Effect = "Allow"
-
-        Action = [
-          "eks:DescribeCluster"
-        ]
-
-        Resource = "arn:aws:eks:us-east-1:245361884126:cluster/production-cluster"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "ec2_eks_readonly_attach" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = aws_iam_policy.ec2_eks_readonly.arn
-}
 
 
 

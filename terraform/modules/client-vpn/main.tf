@@ -3,6 +3,8 @@ resource "aws_ec2_client_vpn_endpoint" "this" {
 
   client_cidr_block = var.client_cidr_block
 
+  vpc_id = var.vpc_id
+
   server_certificate_arn = var.server_certificate_arn
 
   split_tunnel = true
